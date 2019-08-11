@@ -99,7 +99,7 @@ public class ServiceLayerTest {
         expectedOutput.setPhone("201-200-1000");
 
         assertEquals(expectedOutput, serviceLayer.updateCustomer(expectedOutput));
-        
+
         //A customer that doesn't exist in DB
         CustomerViewModel fakeCustomer = new CustomerViewModel();
         fakeCustomer.setCustomerId(2);

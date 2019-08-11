@@ -4,11 +4,13 @@ import com.company.customerservice.dao.CustomerDao;
 import com.company.customerservice.dto.Customer;
 import com.company.customerservice.views.CustomerViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class ServiceLayer {
 
     private CustomerDao dao;
