@@ -1,6 +1,6 @@
-package com.company.customerservice.controller;
+package com.company.AdminAPI.controller;
 
-import com.company.customerservice.exception.NotFoundException;
+import com.company.AdminAPI.exception.NotFoundException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.hateoas.VndErrors;

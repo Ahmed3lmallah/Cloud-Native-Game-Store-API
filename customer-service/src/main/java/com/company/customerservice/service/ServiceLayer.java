@@ -2,6 +2,7 @@ package com.company.customerservice.service;
 
 import com.company.customerservice.dao.CustomerDao;
 import com.company.customerservice.dto.Customer;
+import com.company.customerservice.exception.NotFoundException;
 import com.company.customerservice.views.CustomerViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -36,7 +37,7 @@ public class ServiceLayer {
     public CustomerViewModel findCustomer(int customerId){
         Customer customer = dao.getCustomer(customerId);
         if(customer==null){
-            throw new com.trilogyed.post.exception.NotFoundException("Customer ID cannot be found in DB!");
+            throw new NotFoundException("Customer ID cannot be found in DB!");
         } else {
             return buildCustomerViewModel(customer);
         }

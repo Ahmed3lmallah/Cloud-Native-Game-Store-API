@@ -1,4 +1,4 @@
-package com.company.customerservice.exception;
+package com.company.AdminAPI.exception;
 
 /**
  * Exception class to handle not found cases in get APIs
