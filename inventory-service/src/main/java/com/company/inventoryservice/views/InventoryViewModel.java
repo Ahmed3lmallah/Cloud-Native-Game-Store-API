@@ -1,11 +1,15 @@
 package com.company.inventoryservice.views;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Objects;
 
 public class InventoryViewModel {
 
     private int inventoryID;
+    @Positive(message = "Must provide productId that is positive!")
     private int productID;
+    @PositiveOrZero(message = "Must provide quantity that is positive or zero!")
     private int quantity;
 
     @Override

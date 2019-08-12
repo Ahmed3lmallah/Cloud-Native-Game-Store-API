@@ -42,7 +42,7 @@ public class ServiceLayer {
         }
     }
 
-    public List<InventoryViewModel> findAllInventorys(){
+    public List<InventoryViewModel> findAllInventories(){
         List<Inventory> inventories = dao.getAllInventory();
         List<InventoryViewModel> inventoryViewModels = new ArrayList<>();
 

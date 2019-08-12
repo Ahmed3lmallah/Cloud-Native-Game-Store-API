@@ -64,8 +64,8 @@ public class ServiceLayerTest {
         expectedOutput.setQuantity(100);
 
         //Asserting
-        assertEquals(1,serviceLayer.findAllInventorys().size());
-        assertEquals(expectedOutput, serviceLayer.findAllInventorys().get(0));
+        assertEquals(1,serviceLayer.findAllInventories().size());
+        assertEquals(expectedOutput, serviceLayer.findAllInventories().get(0));
     }
 
     @Test(expected = NotFoundException.class)
