@@ -64,6 +64,7 @@ public class ServiceLayer {
         return findProduct(productViewModel.getProductId());
     }
 
+    @Transactional
     public String removeProduct(int productId){
         //Checking if product exists
         findProduct(productId);

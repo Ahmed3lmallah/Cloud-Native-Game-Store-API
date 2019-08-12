@@ -64,6 +64,7 @@ public class ServiceLayer {
         return findCustomer(customerViewModel.getCustomerId());
     }
 
+    @Transactional
     public String removeCustomer(int customerId){
         //Checking if customer exists
         findCustomer(customerId);
