@@ -3,6 +3,7 @@ package com.company.customerservice.service;
 import com.company.customerservice.dao.CustomerDao;
 import com.company.customerservice.dao.CustomerDaoJdbcTemplateImpl;
 import com.company.customerservice.dto.Customer;
+import com.company.customerservice.exception.NotFoundException;
 import com.company.customerservice.views.CustomerViewModel;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,7 +85,7 @@ public class ServiceLayerTest {
 
     }
 
-    @Test(expected = com.trilogyed.post.exception.NotFoundException.class)
+    @Test(expected = NotFoundException.class)
     public void updateCustomer() {
         //Updating Customer
         //expected & Input
@@ -114,7 +115,7 @@ public class ServiceLayerTest {
         serviceLayer.updateCustomer(fakeCustomer);
     }
 
-    @Test(expected = com.trilogyed.post.exception.NotFoundException.class)
+    @Test(expected = NotFoundException.class)
     public void removeCustomer() {
         assertEquals(serviceLayer.removeCustomer(1), "Customer [1] deleted successfully!");
 

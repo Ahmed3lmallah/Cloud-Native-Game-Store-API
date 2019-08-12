@@ -5,13 +5,13 @@ import com.company.customerservice.dto.Customer;
 import com.company.customerservice.exception.NotFoundException;
 import com.company.customerservice.views.CustomerViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+@Service
 public class ServiceLayer {
 
     private CustomerDao dao;
