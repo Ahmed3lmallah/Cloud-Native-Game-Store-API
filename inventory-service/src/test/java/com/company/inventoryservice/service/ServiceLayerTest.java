@@ -70,7 +70,7 @@ public class ServiceLayerTest {
 
     @Test(expected = NotFoundException.class)
     public void updateInventory() {
-        //Updating Inventory
+        //Updating Invoice
         //expected & Input
         InventoryViewModel expectedOutput = new InventoryViewModel();
         expectedOutput.setInventoryID(1);
@@ -79,7 +79,7 @@ public class ServiceLayerTest {
 
         assertEquals(expectedOutput, serviceLayer.updateInventory(expectedOutput));
 
-        //A Product that doesn't exist in DB
+        //An Invoice that doesn't exist in DB
         InventoryViewModel fakeInventory = new InventoryViewModel();
         fakeInventory.setInventoryID(2);
         fakeInventory.setProductID(10);

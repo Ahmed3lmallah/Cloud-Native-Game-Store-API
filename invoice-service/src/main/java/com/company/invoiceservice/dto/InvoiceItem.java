@@ -1,5 +1,7 @@
 package com.company.invoiceservice.dto;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -7,8 +9,11 @@ public class InvoiceItem {
 
     private int invoiceItemId;
     private int invoiceId;
+    @Positive(message = "Must provide a valid inventoryId (positive)!")
     private int inventoryId;
+    @Positive(message = "Must provide a valid quantity (positive)!")
     private int quantity;
+    @PositiveOrZero(message = "Must provide a valid listPrice (positive)!")
     private BigDecimal listPrice;
 
     @Override
