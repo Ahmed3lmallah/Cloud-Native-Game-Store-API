@@ -8,7 +8,7 @@ import java.util.Objects;
 public class InventoryViewModel {
 
     private int inventoryID;
-    @NotNull(message = "Must provide a Product item (with only the productId)!")
+    @NotNull(message = "Must provide a Product object (with only the productId)!")
     private ProductViewModel product;
     @PositiveOrZero(message = "Must provide quantity that is positive or zero!")
     private int quantity;

@@ -3,10 +3,13 @@ package com.company.AdminAPI.service;
 import com.company.AdminAPI.exception.NotFoundException;
 import com.company.AdminAPI.util.feign.CustomerClient;
 import com.company.AdminAPI.util.feign.InventoryClient;
+import com.company.AdminAPI.util.feign.LevelUpClient;
 import com.company.AdminAPI.util.feign.ProductClient;
 import com.company.AdminAPI.util.messages.Inventory;
+import com.company.AdminAPI.util.messages.LevelUp;
 import com.company.AdminAPI.views.CustomerViewModel;
 import com.company.AdminAPI.views.InventoryViewModel;
+import com.company.AdminAPI.views.LevelUpViewModel;
 import com.company.AdminAPI.views.ProductViewModel;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +24,14 @@ public class ServiceLayer {
     private CustomerClient customerClient;
     private ProductClient productClient;
     private InventoryClient inventoryClient;
+    private LevelUpClient levelUpClient;
 
     @Autowired
-    public ServiceLayer(CustomerClient customerClient, ProductClient productClient, InventoryClient inventoryClient) {
+    public ServiceLayer(CustomerClient customerClient, ProductClient productClient, InventoryClient inventoryClient, LevelUpClient levelUpClient) {
         this.customerClient = customerClient;
         this.productClient = productClient;
         this.inventoryClient = inventoryClient;
+        this.levelUpClient = levelUpClient;
     }
 
     //
@@ -84,6 +89,60 @@ public class ServiceLayer {
         return productClient.deleteProduct(productId);
     }
     //
+    // Level Up! Service Methods
+    // --------------------- //
+    public LevelUpViewModel saveLevelUp(LevelUpViewModel levelUpViewModel){
+        // Checking if Customer exists - throws an exception if not
+        checkForCustomer(levelUpViewModel.getCustomer().getCustomerId());
+
+        // Persisting LevelUp! Item
+        LevelUp levelUp = new LevelUp();
+        levelUp.setCustomerId(levelUpViewModel.getCustomer().getCustomerId());
+        levelUp.setMemberDate(levelUpViewModel.getMemberDate());
+        levelUp.setPoints(levelUpViewModel.getPoints());
+
+        // Creating Level Up!
+        System.out.println("Contacting Level Up! Service client to save Level Up! entry...");
+        return buildLevelUpViewModel(levelUpClient.createLevelUp(levelUp));
+    }
+
+    public LevelUpViewModel findLevelUp(int levelUpId){
+        System.out.println("Contacting Level Up! Service client to get Level Up! entry...");
+        return buildLevelUpViewModel(levelUpClient.getLevelUp(levelUpId));
+    }
+
+    public List<LevelUpViewModel> findAllLevelUps(){
+        // Getting inventory list
+        System.out.println("Contacting Level Up! Service client to get all Level Up! entries...");
+        List<LevelUp> fromLevelUpService = levelUpClient.getAllLevelUps();
+        // Building ViewModels
+        List<LevelUpViewModel> levelUpViewModels = new ArrayList<>();
+        fromLevelUpService.forEach(levelUp -> levelUpViewModels.add(buildLevelUpViewModel(levelUp)));
+
+        return levelUpViewModels;
+    }
+
+    public LevelUpViewModel updateLevelUp(LevelUpViewModel levelUpViewModel){
+        // Checking if customer exists - throws an exception if not
+        checkForCustomer(levelUpViewModel.getCustomer().getCustomerId());
+
+        // Persisting LevelUp! Item
+        LevelUp levelUp = new LevelUp();
+        levelUp.setLevelUpId(levelUpViewModel.getLevelUpId());
+        levelUp.setCustomerId(levelUpViewModel.getCustomer().getCustomerId());
+        levelUp.setMemberDate(levelUpViewModel.getMemberDate());
+        levelUp.setPoints(levelUpViewModel.getPoints());
+
+        // Updating LevelUp!
+        System.out.println("Contacting Level Up! Service client to update Level Up! entry...");
+        return buildLevelUpViewModel(levelUpClient.updateLevelUp(levelUp, levelUp.getLevelUpId()));
+    }
+
+    public String removeLevelUp(int levelUpId){
+        System.out.println("Contacting Level Up! Service client to remove Level Up! entry...");
+        return levelUpClient.deleteLevelUp(levelUpId);
+    }
+    //
     // Inventory Service Methods
     // --------------------- //
     public InventoryViewModel saveInventory(InventoryViewModel inventoryViewModel){
@@ -92,7 +151,6 @@ public class ServiceLayer {
 
         // Persisting Inventory Item
         Inventory inventory = new Inventory();
-        inventory.setInventoryID(inventoryViewModel.getInventoryID());
         inventory.setProductID(inventoryViewModel.getProduct().getProductId());
         inventory.setQuantity(inventoryViewModel.getQuantity());
 
@@ -138,7 +196,7 @@ public class ServiceLayer {
     }
 
     //
-    // HELPER METHOD
+    // HELPER METHODS
     private void checkForProduct(int productId){
         System.out.println("Checking if product exists...");
         try{
@@ -158,5 +216,27 @@ public class ServiceLayer {
         // Getting Product
         inventoryViewModel.setProduct(findProduct(inventory.getProductID()));
         return inventoryViewModel;
+    }
+
+    private void checkForCustomer(int customerId){
+        System.out.println("Checking if customer exists...");
+        try{
+            findCustomer(customerId);
+        } catch (FeignException e){
+            System.out.println("...customer wasn't found in DB!");
+            throw new NotFoundException("Customer doesn't exist! Create the customer first using: [POST] 'uri=/customers' endpoint.");
+        }
+        System.out.println("...customer found in DB!");
+    }
+
+    private LevelUpViewModel buildLevelUpViewModel(LevelUp levelUp){
+        // Persisting LevelUp!
+        LevelUpViewModel levelUpViewModel = new LevelUpViewModel();
+        levelUpViewModel.setLevelUpId(levelUp.getLevelUpId());
+        levelUpViewModel.setMemberDate(levelUp.getMemberDate());
+        levelUpViewModel.setPoints(levelUp.getPoints());
+        // Getting Customer
+        levelUpViewModel.setCustomer(findCustomer(levelUp.getCustomerId()));
+        return levelUpViewModel;
     }
 }
