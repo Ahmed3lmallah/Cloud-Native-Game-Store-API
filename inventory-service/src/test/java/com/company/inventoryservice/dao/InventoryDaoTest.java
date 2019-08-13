@@ -34,9 +34,9 @@ public class InventoryDaoTest {
         inventory.setProductID(1);
         inventory.setQuantity(100);
 
-        //Adding Customer
+        //Adding Inventory
         Inventory fromAdd = dao.addInventory(inventory);
-        //Getting Customer
+        //Getting Inventory
         Inventory fromGet = dao.getInventory(fromAdd.getInventoryID());
 
         //Asserting
@@ -66,7 +66,7 @@ public class InventoryDaoTest {
         inventory.setQuantity(100);
         inventory = dao.addInventory(inventory);
 
-        //Updating Customer
+        //Updating Inventory
         inventory.setQuantity(95);
         dao.updateInventory(inventory);
 

@@ -1,6 +1,7 @@
 package com.company.inventoryservice.dao;
 
 import com.company.inventoryservice.dto.Inventory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,7 @@ public class InventoryDaoJdbcTemplateImpl implements InventoryDao {
     // ---------------------------//
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public InventoryDaoJdbcTemplateImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
