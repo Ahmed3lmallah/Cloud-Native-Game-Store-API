@@ -1,15 +1,17 @@
 package com.company.levelUpservice.views;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class LevelUpViewModel {
 
     private int levelUpId;
-    @NotNull(message = "Must provide customerId!")
+    @Positive(message = "Must provide customerId that is valid (positive)!")
     private int customerId;
-    @NotNull(message = "Must provide points!")
+    @PositiveOrZero(message = "Must provide points (positive or zero)!")
     private int points;
     @NotNull(message = "Must provide memberDate!")
     private LocalDate memberDate;
