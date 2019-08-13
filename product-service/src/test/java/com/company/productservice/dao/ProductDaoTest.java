@@ -36,9 +36,9 @@ public class ProductDaoTest {
         product.setListPrice(new BigDecimal("299.99").setScale(2));
         product.setUnitCost(new BigDecimal("200.00").setScale(2));
 
-        //Adding Customer
+        //Adding Product
         Product fromAdd = dao.addProduct(product);
-        //Getting Customer
+        //Getting Product
         Product fromGet = dao.getProduct(fromAdd.getProductId());
 
         //Asserting
@@ -71,7 +71,7 @@ public class ProductDaoTest {
         product.setUnitCost(new BigDecimal("200.00").setScale(2));
         product = dao.addProduct(product);
 
-        //Updating Customer
+        //Updating Product
         product.setProductName("XBOX ONE PRO");
         dao.updateProduct(product);
 
