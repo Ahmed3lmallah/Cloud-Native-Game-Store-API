@@ -10,7 +10,6 @@ public class LevelUpViewModel {
 
     private int levelUpId;
     @NotNull(message = "Must provide a Customer object (with only the customerId)!")
-    @Valid
     private CustomerViewModel customer;
     @NotNull(message = "Must provide memberDate!")
     private LocalDate memberDate;
