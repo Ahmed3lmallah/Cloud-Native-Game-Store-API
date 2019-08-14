@@ -58,6 +58,19 @@ public class ServiceLayerTest {
     }
 
     @Test
+    public void findLevelUpByCustomerId() {
+        //expected
+        LevelUpViewModel expectedOutput = new LevelUpViewModel();
+        expectedOutput.setLevelUpId(1);
+        expectedOutput.setCustomerId(1);
+        expectedOutput.setMemberDate(LocalDate.of(2019,10,05));
+        expectedOutput.setPoints(25);
+
+        //Asserting
+        assertEquals(expectedOutput, serviceLayer.findLevelUpByCustomerId(1));
+    }
+
+    @Test
     public void findAllLevelUps() {
         //expected
         LevelUpViewModel expectedOutput = new LevelUpViewModel();
@@ -124,6 +137,7 @@ public class ServiceLayerTest {
 
         doReturn(output).when(levelUpDao).addLevelUp(input);
         doReturn(output).when(levelUpDao).getLevelUp(1);
+        doReturn(output).when(levelUpDao).getLevelUpByCustomerId(1);
         doReturn(levelUps).when(levelUpDao).getAllLevelUp();
         doNothing().when(levelUpDao).updateLevelUp(input);
     }

@@ -36,6 +36,12 @@ public class LevelUpController {
         return serviceLayer.findLevelUp(id);
     }
 
+    @GetMapping(value = "/customer/{customerId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public LevelUpViewModel getLevelUpByCustomerId(@PathVariable int customerId) {
+        return serviceLayer.findLevelUpByCustomerId(customerId);
+    }
+
     @PutMapping(value = "/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public LevelUpViewModel updateLevelUp(@RequestBody @Valid LevelUpViewModel levelUpViewModel, @PathVariable int id) {

@@ -1,20 +1,21 @@
 package com.company.AdminAPI.service;
 
 import com.company.AdminAPI.exception.NotFoundException;
-import com.company.AdminAPI.util.feign.CustomerClient;
-import com.company.AdminAPI.util.feign.InventoryClient;
-import com.company.AdminAPI.util.feign.LevelUpClient;
-import com.company.AdminAPI.util.feign.ProductClient;
-import com.company.AdminAPI.util.messages.Inventory;
-import com.company.AdminAPI.util.messages.LevelUp;
-import com.company.AdminAPI.views.CustomerViewModel;
-import com.company.AdminAPI.views.InventoryViewModel;
-import com.company.AdminAPI.views.LevelUpViewModel;
-import com.company.AdminAPI.views.ProductViewModel;
+import com.company.AdminAPI.util.feign.*;
+import com.company.AdminAPI.views.*;
+import com.company.AdminAPI.views.input.InventoryInputModel;
+import com.company.AdminAPI.views.input.InvoiceInputModel;
+import com.company.AdminAPI.views.input.LevelUpInputModel;
+import com.company.AdminAPI.views.output.InventoryViewModel;
+import com.company.AdminAPI.views.output.InvoiceItemViewModel;
+import com.company.AdminAPI.views.output.InvoiceViewModel;
+import com.company.AdminAPI.views.output.LevelUpViewModel;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,13 +26,15 @@ public class ServiceLayer {
     private ProductClient productClient;
     private InventoryClient inventoryClient;
     private LevelUpClient levelUpClient;
+    private InvoiceClient invoiceClient;
 
     @Autowired
-    public ServiceLayer(CustomerClient customerClient, ProductClient productClient, InventoryClient inventoryClient, LevelUpClient levelUpClient) {
+    public ServiceLayer(CustomerClient customerClient, ProductClient productClient, InventoryClient inventoryClient, LevelUpClient levelUpClient, InvoiceClient invoiceClient) {
         this.customerClient = customerClient;
         this.productClient = productClient;
         this.inventoryClient = inventoryClient;
         this.levelUpClient = levelUpClient;
+        this.invoiceClient = invoiceClient;
     }
 
     //
@@ -91,19 +94,13 @@ public class ServiceLayer {
     //
     // Level Up! Service Methods
     // --------------------- //
-    public LevelUpViewModel saveLevelUp(LevelUpViewModel levelUpViewModel){
+    public LevelUpViewModel saveLevelUp(LevelUpInputModel levelUpInputModel){
         // Checking if Customer exists - throws an exception if not
-        checkForCustomer(levelUpViewModel.getCustomer().getCustomerId());
-
-        // Persisting LevelUp! Item
-        LevelUp levelUp = new LevelUp();
-        levelUp.setCustomerId(levelUpViewModel.getCustomer().getCustomerId());
-        levelUp.setMemberDate(levelUpViewModel.getMemberDate());
-        levelUp.setPoints(levelUpViewModel.getPoints());
+        checkForCustomer(levelUpInputModel.getCustomerId());
 
         // Creating Level Up!
         System.out.println("Contacting Level Up! Service client to save Level Up! entry...");
-        return buildLevelUpViewModel(levelUpClient.createLevelUp(levelUp));
+        return buildLevelUpViewModel(levelUpClient.createLevelUp(levelUpInputModel));
     }
 
     public LevelUpViewModel findLevelUp(int levelUpId){
@@ -111,10 +108,15 @@ public class ServiceLayer {
         return buildLevelUpViewModel(levelUpClient.getLevelUp(levelUpId));
     }
 
+    public LevelUpViewModel findLevelUpByCustomerId(int customerId){
+        System.out.println("Contacting Level Up! Service client to get Level Up! entry...");
+        return buildLevelUpViewModel(levelUpClient.getLevelUpByCustomerId(customerId));
+    }
+
     public List<LevelUpViewModel> findAllLevelUps(){
         // Getting inventory list
         System.out.println("Contacting Level Up! Service client to get all Level Up! entries...");
-        List<LevelUp> fromLevelUpService = levelUpClient.getAllLevelUps();
+        List<LevelUpInputModel> fromLevelUpService = levelUpClient.getAllLevelUps();
         // Building ViewModels
         List<LevelUpViewModel> levelUpViewModels = new ArrayList<>();
         fromLevelUpService.forEach(levelUp -> levelUpViewModels.add(buildLevelUpViewModel(levelUp)));
@@ -122,20 +124,13 @@ public class ServiceLayer {
         return levelUpViewModels;
     }
 
-    public LevelUpViewModel updateLevelUp(LevelUpViewModel levelUpViewModel){
+    public LevelUpViewModel updateLevelUp(LevelUpInputModel levelUpInputModel){
         // Checking if customer exists - throws an exception if not
-        checkForCustomer(levelUpViewModel.getCustomer().getCustomerId());
-
-        // Persisting LevelUp! Item
-        LevelUp levelUp = new LevelUp();
-        levelUp.setLevelUpId(levelUpViewModel.getLevelUpId());
-        levelUp.setCustomerId(levelUpViewModel.getCustomer().getCustomerId());
-        levelUp.setMemberDate(levelUpViewModel.getMemberDate());
-        levelUp.setPoints(levelUpViewModel.getPoints());
+        checkForCustomer(levelUpInputModel.getCustomerId());
 
         // Updating LevelUp!
         System.out.println("Contacting Level Up! Service client to update Level Up! entry...");
-        return buildLevelUpViewModel(levelUpClient.updateLevelUp(levelUp, levelUp.getLevelUpId()));
+        return buildLevelUpViewModel(levelUpClient.updateLevelUp(levelUpInputModel, levelUpInputModel.getLevelUpId()));
     }
 
     public String removeLevelUp(int levelUpId){
@@ -145,18 +140,13 @@ public class ServiceLayer {
     //
     // Inventory Service Methods
     // --------------------- //
-    public InventoryViewModel saveInventory(InventoryViewModel inventoryViewModel){
+    public InventoryViewModel saveInventory(InventoryInputModel inventoryInputModel){
         // Checking if product exists - throws an exception if not
-        checkForProduct(inventoryViewModel.getProduct().getProductId());
-
-        // Persisting Inventory Item
-        Inventory inventory = new Inventory();
-        inventory.setProductID(inventoryViewModel.getProduct().getProductId());
-        inventory.setQuantity(inventoryViewModel.getQuantity());
+        checkForProduct(inventoryInputModel.getProductId());
 
         // Creating Inventory
         System.out.println("Contacting Inventory Service client to create inventory...");
-        return buildInventoryViewModel(inventoryClient.createInventory(inventory));
+        return buildInventoryViewModel(inventoryClient.createInventory(inventoryInputModel));
     }
 
     public InventoryViewModel findInventory(int inventoryId){
@@ -167,7 +157,7 @@ public class ServiceLayer {
     public List<InventoryViewModel> findAllInventories(){
         // Getting inventory list
         System.out.println("Contacting Inventory Service client to get all inventories...");
-        List<Inventory> fromInventoryService = inventoryClient.getAllInventories();
+        List<InventoryInputModel> fromInventoryService = inventoryClient.getAllInventories();
         // Building ViewModels
         List<InventoryViewModel> inventoryViewModels = new ArrayList<>();
         fromInventoryService.forEach(inventory -> inventoryViewModels.add(buildInventoryViewModel(inventory)));
@@ -175,24 +165,129 @@ public class ServiceLayer {
         return inventoryViewModels;
     }
 
-    public InventoryViewModel updateInventory(InventoryViewModel inventoryViewModel){
+    public InventoryViewModel updateInventory(InventoryInputModel inventoryInputModel){
         // Checking if product exists - throws an exception if not
-        checkForProduct(inventoryViewModel.getProduct().getProductId());
-
-        // Persisting Inventory Item
-        Inventory inventory = new Inventory();
-        inventory.setInventoryID(inventoryViewModel.getInventoryID());
-        inventory.setProductID(inventoryViewModel.getProduct().getProductId());
-        inventory.setQuantity(inventoryViewModel.getQuantity());
+        checkForProduct(inventoryInputModel.getProductId());
 
         // Updating Inventory
         System.out.println("Contacting Inventory Service client to update inventory...");
-        return buildInventoryViewModel(inventoryClient.updateInventory(inventory, inventory.getInventoryID()));
+        return buildInventoryViewModel(inventoryClient.updateInventory(inventoryInputModel, inventoryInputModel.getInventoryId()));
     }
 
     public String removeInventory(int inventoryId){
         System.out.println("Contacting Inventory Service client to delete inventory...");
         return inventoryClient.deleteInventory(inventoryId);
+    }
+    //
+    // Invoice Service Methods
+    // --------------------- //
+    public InvoiceViewModel saveInvoice(InvoiceInputModel invoiceInputModel){
+
+        // initializing...
+        InvoiceViewModel invoiceViewModel = new InvoiceViewModel();
+        List<InvoiceItemViewModel> invoiceItems = new ArrayList<>();
+        int points;
+        List<BigDecimal> totalPrice = new ArrayList<>();
+
+        // Checking if customer exists - throws an exception if not
+        checkForCustomer(invoiceInputModel.getCustomerId());
+
+        // Assign Customer
+        invoiceViewModel.setCustomer(findCustomer(invoiceInputModel.getCustomerId()));
+
+        // Checking Quantity and if Inventory exists
+        invoiceInputModel.getInvoiceItems().forEach(invoiceItem -> {
+            //Checking Inventory
+            InventoryViewModel inventory = findInventory(invoiceItem.getInventoryId());
+
+            //Checking Quantity
+            if(invoiceItem.getQuantity()>inventory.getQuantity()){
+                throw new IllegalArgumentException("Inventory Id ["+invoiceItem.getInventoryId()+
+                        "]: Only "+inventory.getQuantity()+" items available at storage.");
+            }
+
+            //Calculating Price
+            invoiceItem.setListPrice(inventory.getProduct().getListPrice());
+            BigDecimal itemPrice = BigDecimal.valueOf( invoiceItem.getQuantity() ).multiply( inventory.getProduct().getListPrice() ).setScale(2, RoundingMode.HALF_UP);
+            totalPrice.add(itemPrice);
+        });
+
+        // Saving invoice
+        System.out.println("Contacting Invoice Service client to create invoice...");
+        invoiceInputModel = invoiceClient.createInvoice(invoiceInputModel);
+
+        //Building ViewModel...
+        invoiceViewModel.setInvoiceId(invoiceInputModel.getInvoiceId());
+        invoiceViewModel.setPurchaseDate(invoiceInputModel.getPurchaseDate());
+        invoiceInputModel.getInvoiceItems().forEach(invoiceItem -> {
+            //Persisting InvoiceItems
+            InvoiceItemViewModel invoiceItemViewModel = new InvoiceItemViewModel();
+            invoiceItemViewModel.setInvoiceId(invoiceItem.getInvoiceId());
+            invoiceItemViewModel.setInvoiceItemId(invoiceItem.getInvoiceItemId());
+            invoiceItemViewModel.setListPrice(invoiceItem.getListPrice());
+            invoiceItemViewModel.setQuantity(invoiceItem.getQuantity());
+            invoiceItemViewModel.setInventory(findInventory(invoiceItem.getInventoryId()));
+            invoiceItems.add(invoiceItemViewModel);
+        });
+        invoiceViewModel.setInvoiceItems(invoiceItems);
+
+        // LevelUp! points
+        int result = totalPrice.stream().reduce(BigDecimal.ZERO, BigDecimal::add).intValue();
+        points = (result/50)*10;
+
+        LevelUpViewModel currentPoints = findLevelUpByCustomerId(invoiceViewModel.getCustomer().getCustomerId());
+        currentPoints.setPoints(currentPoints.getPoints()+points);
+        currentPoints = updateLevelUp(convertLevelUptoInputModel(currentPoints));
+
+        invoiceViewModel.setMemberPoints(currentPoints.getPoints());
+
+        return invoiceViewModel;
+    }
+
+    public InvoiceViewModel findInvoice(int invoiceId){
+        System.out.println("Contacting Invoice Service client to get invoice...");
+        return buildInvoiceViewModel(invoiceClient.getInvoice(invoiceId));
+    }
+
+    public List<InvoiceViewModel> findAllInvoices(){
+        // Getting invoices list
+        System.out.println("Contacting Invoice Service client to get all invoices...");
+        List<InvoiceInputModel> fromInvoiceService = invoiceClient.getAllInvoices();
+
+        // Building ViewModels
+        List<InvoiceViewModel> invoiceViewModels = new ArrayList<>();
+        fromInvoiceService.forEach(invoice -> invoiceViewModels.add(buildInvoiceViewModel(invoice)));
+
+        return invoiceViewModels;
+    }
+
+    public InvoiceViewModel updateInvoice(InvoiceInputModel invoiceInputModel){
+        // Simply Updates Invoice without adjusting points
+            //Member points adjustments should be done manually
+
+        // Check for Customer
+        checkForCustomer(invoiceInputModel.getCustomerId());
+
+        // Check for Products
+        invoiceInputModel.getInvoiceItems().forEach(invoiceItem -> {
+            //Checking Inventory
+            InventoryViewModel inventory = findInventory(invoiceItem.getInventoryId());
+
+            //Checking Quantity
+            if(invoiceItem.getQuantity()>inventory.getQuantity()){
+                throw new IllegalArgumentException("Inventory Id ["+invoiceItem.getInventoryId()+
+                        "]: Only "+inventory.getQuantity()+" items available at storage.");
+            }
+        });
+
+        // Updating Invoice
+        System.out.println("Contacting Invoice Service client to update invoice...");
+        return buildInvoiceViewModel(invoiceClient.updateInvoice(invoiceInputModel, invoiceInputModel.getInvoiceId()));
+    }
+
+    public String removeInvoice(int invoiceId){
+        System.out.println("Contacting Invoice Service client to delete invoice...");
+        return invoiceClient.deleteInvoice(invoiceId);
     }
 
     //
@@ -208,16 +303,6 @@ public class ServiceLayer {
         System.out.println("...product found in DB!");
     }
 
-    private InventoryViewModel buildInventoryViewModel(Inventory inventory){
-        // Persisting Inventory
-        InventoryViewModel inventoryViewModel = new InventoryViewModel();
-        inventoryViewModel.setInventoryID(inventory.getInventoryID());
-        inventoryViewModel.setQuantity(inventory.getQuantity());
-        // Getting Product
-        inventoryViewModel.setProduct(findProduct(inventory.getProductID()));
-        return inventoryViewModel;
-    }
-
     private void checkForCustomer(int customerId){
         System.out.println("Checking if customer exists...");
         try{
@@ -229,14 +314,61 @@ public class ServiceLayer {
         System.out.println("...customer found in DB!");
     }
 
-    private LevelUpViewModel buildLevelUpViewModel(LevelUp levelUp){
+    private InventoryViewModel buildInventoryViewModel(InventoryInputModel inventoryInputModel){
+        // Persisting Inventory
+        InventoryViewModel inventoryViewModel = new InventoryViewModel();
+        inventoryViewModel.setInventoryId(inventoryInputModel.getInventoryId());
+        inventoryViewModel.setQuantity(inventoryInputModel.getQuantity());
+        // Getting Product
+        inventoryViewModel.setProduct(findProduct(inventoryInputModel.getProductId()));
+        return inventoryViewModel;
+    }
+
+    private LevelUpViewModel buildLevelUpViewModel(LevelUpInputModel levelUpInputModel){
         // Persisting LevelUp!
         LevelUpViewModel levelUpViewModel = new LevelUpViewModel();
-        levelUpViewModel.setLevelUpId(levelUp.getLevelUpId());
-        levelUpViewModel.setMemberDate(levelUp.getMemberDate());
-        levelUpViewModel.setPoints(levelUp.getPoints());
+        levelUpViewModel.setLevelUpId(levelUpInputModel.getLevelUpId());
+        levelUpViewModel.setMemberDate(levelUpInputModel.getMemberDate());
+        levelUpViewModel.setPoints(levelUpInputModel.getPoints());
         // Getting Customer
-        levelUpViewModel.setCustomer(findCustomer(levelUp.getCustomerId()));
+        levelUpViewModel.setCustomer(findCustomer(levelUpInputModel.getCustomerId()));
         return levelUpViewModel;
+    }
+
+    private InvoiceViewModel buildInvoiceViewModel(InvoiceInputModel invoice){
+        //initializing...
+        InvoiceViewModel invoiceViewModel = new InvoiceViewModel();
+        List<InvoiceItemViewModel> invoiceItemsList = new ArrayList<>();
+
+        //InvoiceItems
+        invoice.getInvoiceItems().forEach(invoiceItem -> {
+            InvoiceItemViewModel invoiceItemViewModel = new InvoiceItemViewModel();
+            //Persisting
+            invoiceItemViewModel.setInvoiceId(invoiceItem.getInvoiceId());
+            invoiceItemViewModel.setInvoiceItemId(invoiceItem.getInvoiceItemId());
+            invoiceItemViewModel.setQuantity(invoiceItem.getQuantity());
+            invoiceItemViewModel.setListPrice(invoiceItem.getListPrice());
+            invoiceItemViewModel.setInventory(findInventory(invoiceItem.getInventoryId()));
+            //Adding to list
+            invoiceItemsList.add(invoiceItemViewModel);
+        });
+
+        //persisting
+        invoiceViewModel.setInvoiceId(invoice.getInvoiceId());
+        invoiceViewModel.setPurchaseDate(invoice.getPurchaseDate());
+        invoiceViewModel.setCustomer(findCustomer(invoice.getCustomerId()));
+        invoiceViewModel.setMemberPoints(findLevelUpByCustomerId(invoice.getCustomerId()).getPoints());
+        invoiceViewModel.setInvoiceItems(invoiceItemsList);
+
+        return invoiceViewModel;
+    }
+
+    private LevelUpInputModel convertLevelUptoInputModel(LevelUpViewModel levelUpViewModel){
+        LevelUpInputModel levelUpInputModel = new LevelUpInputModel();
+        levelUpInputModel.setLevelUpId(levelUpViewModel.getLevelUpId());
+        levelUpInputModel.setCustomerId(levelUpViewModel.getCustomer().getCustomerId());
+        levelUpInputModel.setMemberDate(levelUpViewModel.getMemberDate());
+        levelUpInputModel.setPoints(levelUpViewModel.getPoints());
+        return levelUpInputModel;
     }
 }

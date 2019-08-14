@@ -27,11 +27,11 @@ public class InvoiceItemDaoTest {
 
     @Before
     public void setUp() throws Exception {
-        List<Invoice> invoices = invoiceDao.getAllInvoices();
-        invoices.forEach(invoice -> invoiceDao.getInvoice(invoice.getInvoiceId()));
-
         List<InvoiceItem> invoiceItems = invoiceItemDao.getAllInvoiceItems();
         invoiceItems.forEach(invoiceItem -> invoiceItemDao.deleteInvoiceItem(invoiceItem.getInvoiceItemId()));
+
+        List<Invoice> invoices = invoiceDao.getAllInvoices();
+        invoices.forEach(invoice -> invoiceDao.deleteInvoice(invoice.getInvoiceId()));
     }
 
     @Test

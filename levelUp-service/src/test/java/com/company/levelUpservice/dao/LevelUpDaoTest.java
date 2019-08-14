@@ -39,9 +39,12 @@ public class LevelUpDaoTest {
         LevelUp fromAdd = dao.addLevelUp(levelUp);
         //Getting LevelUp
         LevelUp fromGet = dao.getLevelUp(fromAdd.getLevelUpId());
+        //Getting By Customer
+        LevelUp byCustomer = dao.getLevelUpByCustomerId(1);
 
         //Asserting
         assertEquals(fromAdd, fromGet);
+        assertEquals(byCustomer, fromGet);
     }
 
     @Test

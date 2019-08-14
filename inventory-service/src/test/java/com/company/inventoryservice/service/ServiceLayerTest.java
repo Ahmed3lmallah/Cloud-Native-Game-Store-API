@@ -8,7 +8,6 @@ import com.company.inventoryservice.views.InventoryViewModel;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,14 +29,14 @@ public class ServiceLayerTest {
     public void saveInventory() {
         //Input
         InventoryViewModel input = new InventoryViewModel();
-        input.setProductID(10);
+        input.setProductId(10);
         input.setQuantity(100);
 
         //From Service
         InventoryViewModel fromService = serviceLayer.saveInventory(input);
 
         //expected
-        input.setInventoryID(1);
+        input.setInventoryId(1);
 
         //Asserting
         assertEquals(input, fromService);
@@ -47,8 +46,8 @@ public class ServiceLayerTest {
     public void findInventory() {
         //expected
         InventoryViewModel expectedOutput = new InventoryViewModel();
-        expectedOutput.setInventoryID(1);
-        expectedOutput.setProductID(10);
+        expectedOutput.setInventoryId(1);
+        expectedOutput.setProductId(10);
         expectedOutput.setQuantity(100);
 
         //Asserting
@@ -59,8 +58,8 @@ public class ServiceLayerTest {
     public void findAllInventorys() {
         //expected
         InventoryViewModel expectedOutput = new InventoryViewModel();
-        expectedOutput.setInventoryID(1);
-        expectedOutput.setProductID(10);
+        expectedOutput.setInventoryId(1);
+        expectedOutput.setProductId(10);
         expectedOutput.setQuantity(100);
 
         //Asserting
@@ -73,16 +72,16 @@ public class ServiceLayerTest {
         //Updating Invoice
         //expected & Input
         InventoryViewModel expectedOutput = new InventoryViewModel();
-        expectedOutput.setInventoryID(1);
-        expectedOutput.setProductID(10);
+        expectedOutput.setInventoryId(1);
+        expectedOutput.setProductId(10);
         expectedOutput.setQuantity(100);
 
         assertEquals(expectedOutput, serviceLayer.updateInventory(expectedOutput));
 
         //An Invoice that doesn't exist in DB
         InventoryViewModel fakeInventory = new InventoryViewModel();
-        fakeInventory.setInventoryID(2);
-        fakeInventory.setProductID(10);
+        fakeInventory.setInventoryId(2);
+        fakeInventory.setProductId(10);
         fakeInventory.setQuantity(100);
 
         serviceLayer.updateInventory(fakeInventory);

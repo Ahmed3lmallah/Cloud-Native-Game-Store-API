@@ -28,7 +28,7 @@ public class ServiceLayer {
 
         inventory = dao.addInventory(inventory);
 
-        inventoryViewModel.setInventoryID(inventory.getInventoryID());
+        inventoryViewModel.setInventoryId(inventory.getInventoryID());
 
         return inventoryViewModel;
     }
@@ -54,13 +54,13 @@ public class ServiceLayer {
     @Transactional
     public InventoryViewModel updateInventory(InventoryViewModel inventoryViewModel){
         //Checking if Inventory exists
-        findInventory(inventoryViewModel.getInventoryID());
+        findInventory(inventoryViewModel.getInventoryId());
 
         //Updating
         dao.updateInventory(viewModelToModel(inventoryViewModel));
 
         //Retrieving
-        return findInventory(inventoryViewModel.getInventoryID());
+        return findInventory(inventoryViewModel.getInventoryId());
     }
 
     @Transactional
@@ -79,16 +79,16 @@ public class ServiceLayer {
     // --------------------- //
     private Inventory viewModelToModel(InventoryViewModel ivm){
         Inventory inventory = new Inventory();
-        inventory.setInventoryID(ivm.getInventoryID());
-        inventory.setProductID(ivm.getProductID());
+        inventory.setInventoryID(ivm.getInventoryId());
+        inventory.setProductID(ivm.getProductId());
         inventory.setQuantity(ivm.getQuantity());
         return inventory;
     }
 
     private InventoryViewModel buildInventoryViewModel(Inventory inventory){
         InventoryViewModel ivm = new InventoryViewModel();
-        ivm.setInventoryID(inventory.getInventoryID());
-        ivm.setProductID(inventory.getProductID());
+        ivm.setInventoryId(inventory.getInventoryID());
+        ivm.setProductId(inventory.getProductID());
         ivm.setQuantity(inventory.getQuantity());
         return ivm;
     }

@@ -1,10 +1,10 @@
-package com.company.inventoryservice.views;
+package com.company.AdminAPI.views.input;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Objects;
 
-public class InventoryViewModel {
+public class InventoryInputModel {
 
     private int inventoryId;
     @Positive(message = "Must provide productId that is positive!")
@@ -16,7 +16,7 @@ public class InventoryViewModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InventoryViewModel that = (InventoryViewModel) o;
+        InventoryInputModel that = (InventoryInputModel) o;
         return getInventoryId() == that.getInventoryId() &&
                 getProductId() == that.getProductId() &&
                 getQuantity() == that.getQuantity();

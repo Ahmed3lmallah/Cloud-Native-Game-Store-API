@@ -39,7 +39,7 @@ public class InventoryController {
     @PutMapping(value = "/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public InventoryViewModel updateInventory(@RequestBody @Valid InventoryViewModel inventoryViewModel, @PathVariable int id) {
-        if(id!=inventoryViewModel.getInventoryID()){
+        if(id!=inventoryViewModel.getInventoryId()){
             throw new IllegalArgumentException("Inventory ID in path must match with request body!");
         }
         return serviceLayer.updateInventory(inventoryViewModel);

@@ -1,16 +1,13 @@
-package com.company.AdminAPI.views;
+package com.company.AdminAPI.views.output;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
+import com.company.AdminAPI.views.ProductViewModel;
+
 import java.util.Objects;
 
 public class InventoryViewModel {
 
-    private int inventoryID;
-    @NotNull(message = "Must provide a Product object (with only the productId)!")
+    private int inventoryId;
     private ProductViewModel product;
-    @PositiveOrZero(message = "Must provide quantity that is positive or zero!")
     private int quantity;
 
     @Override
@@ -18,22 +15,22 @@ public class InventoryViewModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InventoryViewModel that = (InventoryViewModel) o;
-        return getInventoryID() == that.getInventoryID() &&
+        return getInventoryId() == that.getInventoryId() &&
                 getQuantity() == that.getQuantity() &&
                 Objects.equals(getProduct(), that.getProduct());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInventoryID(), getProduct(), getQuantity());
+        return Objects.hash(getInventoryId(), getProduct(), getQuantity());
     }
 
-    public int getInventoryID() {
-        return inventoryID;
+    public int getInventoryId() {
+        return inventoryId;
     }
 
-    public void setInventoryID(int inventoryID) {
-        this.inventoryID = inventoryID;
+    public void setInventoryId(int inventoryId) {
+        this.inventoryId = inventoryId;
     }
 
     public ProductViewModel getProduct() {

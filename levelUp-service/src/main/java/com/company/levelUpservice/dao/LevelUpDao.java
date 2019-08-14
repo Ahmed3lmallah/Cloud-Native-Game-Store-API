@@ -8,6 +8,7 @@ public interface LevelUpDao {
 
     LevelUp addLevelUp(LevelUp levelUp);
     LevelUp getLevelUp(int levelUpId);
+    LevelUp getLevelUpByCustomerId(int customerId);
     List<LevelUp> getAllLevelUp();
     void updateLevelUp(LevelUp levelUp);
     void deleteLevelUp(int levelUpId);

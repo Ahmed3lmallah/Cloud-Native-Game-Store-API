@@ -1,7 +1,8 @@
 package com.company.AdminAPI.controller;
 
 import com.company.AdminAPI.service.ServiceLayer;
-import com.company.AdminAPI.views.InventoryViewModel;
+import com.company.AdminAPI.views.input.InventoryInputModel;
+import com.company.AdminAPI.views.output.InventoryViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
@@ -26,8 +27,8 @@ public class InventoryController {
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public InventoryViewModel createInventory(@RequestBody @Valid InventoryViewModel inventoryViewModel){
-        return serviceLayer.saveInventory(inventoryViewModel);
+    public InventoryViewModel createInventory(@RequestBody @Valid InventoryInputModel inventoryInputModel){
+        return serviceLayer.saveInventory(inventoryInputModel);
     }
 
     @GetMapping(value = "/{id}")
@@ -38,11 +39,11 @@ public class InventoryController {
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public InventoryViewModel updateInventory(@RequestBody @Valid InventoryViewModel inventoryViewModel, @PathVariable int id) {
-        if(id!=inventoryViewModel.getInventoryID()){
+    public InventoryViewModel updateInventory(@RequestBody @Valid InventoryInputModel inventoryInputModel, @PathVariable int id) {
+        if(id!=inventoryInputModel.getInventoryId()){
             throw new IllegalArgumentException("Inventory ID in path must match with request body!");
         }
-        return serviceLayer.updateInventory(inventoryViewModel);
+        return serviceLayer.updateInventory(inventoryInputModel);
     }
 
     @DeleteMapping(value = "/{id}")

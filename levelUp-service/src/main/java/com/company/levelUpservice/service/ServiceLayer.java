@@ -42,6 +42,15 @@ public class ServiceLayer {
         }
     }
 
+    public LevelUpViewModel findLevelUpByCustomerId(int customerId){
+        LevelUp levelUp = dao.getLevelUpByCustomerId(customerId);
+        if(levelUp==null){
+            throw new NotFoundException("LevelUp membership cannot be found in DB!");
+        } else {
+            return buildLevelUpViewModel(levelUp);
+        }
+    }
+
     public List<LevelUpViewModel> findAllLevelUps(){
         List<LevelUp> levelUps = dao.getAllLevelUp();
         List<LevelUpViewModel> levelUpViewModels = new ArrayList<>();

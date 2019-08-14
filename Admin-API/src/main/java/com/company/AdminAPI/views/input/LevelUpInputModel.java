@@ -1,24 +1,30 @@
-package com.company.AdminAPI.util.messages;
+package com.company.AdminAPI.views.input;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class LevelUp {
+public class LevelUpInputModel {
 
     private int levelUpId;
+    @Positive(message = "Must provide customerId that is valid (positive)!")
     private int customerId;
+    @PositiveOrZero(message = "Must provide points (positive or zero)!")
     private int points;
+    @NotNull(message = "Must provide memberDate!")
     private LocalDate memberDate;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LevelUp levelUp = (LevelUp) o;
-        return getLevelUpId() == levelUp.getLevelUpId() &&
-                getCustomerId() == levelUp.getCustomerId() &&
-                getPoints() == levelUp.getPoints() &&
-                Objects.equals(getMemberDate(), levelUp.getMemberDate());
+        LevelUpInputModel that = (LevelUpInputModel) o;
+        return getLevelUpId() == that.getLevelUpId() &&
+                getCustomerId() == that.getCustomerId() &&
+                getPoints() == that.getPoints() &&
+                Objects.equals(getMemberDate(), that.getMemberDate());
     }
 
     @Override

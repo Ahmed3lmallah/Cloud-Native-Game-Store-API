@@ -42,6 +42,9 @@ public class LevelUpDaoJdbcTemplateImpl implements LevelUpDao {
     private static final String SELECT_LEVEL_UP_SQL =
             "select * from level_up where level_up_id = ?";
 
+    private static final String SELECT_LEVEL_UP_BY_CUSTOMER_ID_SQL =
+            "select * from level_up where customer_id = ?";
+
     private static final String SELECT_ALL_LEVEL_UPS_SQL =
             "select * from level_up";
 
@@ -70,6 +73,15 @@ public class LevelUpDaoJdbcTemplateImpl implements LevelUpDao {
     public LevelUp getLevelUp(int levelUpId) {
         try {
             return jdbcTemplate.queryForObject(SELECT_LEVEL_UP_SQL, this::mapRowToLevelUp, levelUpId);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public LevelUp getLevelUpByCustomerId(int customerId) {
+        try {
+            return jdbcTemplate.queryForObject(SELECT_LEVEL_UP_BY_CUSTOMER_ID_SQL, this::mapRowToLevelUp, customerId);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

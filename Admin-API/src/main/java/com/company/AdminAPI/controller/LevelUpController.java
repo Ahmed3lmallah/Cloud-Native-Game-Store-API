@@ -1,7 +1,8 @@
 package com.company.AdminAPI.controller;
 
 import com.company.AdminAPI.service.ServiceLayer;
-import com.company.AdminAPI.views.LevelUpViewModel;
+import com.company.AdminAPI.views.input.LevelUpInputModel;
+import com.company.AdminAPI.views.output.LevelUpViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
@@ -26,8 +27,8 @@ public class LevelUpController {
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public LevelUpViewModel createLevelUp(@RequestBody @Valid LevelUpViewModel levelUpViewModel){
-        return serviceLayer.saveLevelUp(levelUpViewModel);
+    public LevelUpViewModel createLevelUp(@RequestBody @Valid LevelUpInputModel levelUpInputModel){
+        return serviceLayer.saveLevelUp(levelUpInputModel);
     }
 
     @GetMapping(value = "/{id}")
@@ -36,13 +37,19 @@ public class LevelUpController {
         return serviceLayer.findLevelUp(id);
     }
 
+    @GetMapping(value = "/customer/{customerId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public LevelUpViewModel getLevelUpByCustomerId(@PathVariable int customerId) {
+        return serviceLayer.findLevelUpByCustomerId(customerId);
+    }
+
     @PutMapping(value = "/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public LevelUpViewModel updateLevelUp(@RequestBody @Valid LevelUpViewModel levelUpViewModel, @PathVariable int id) {
-        if(id!=levelUpViewModel.getLevelUpId()){
+    public LevelUpViewModel updateLevelUp(@RequestBody @Valid LevelUpInputModel levelUpInputModel, @PathVariable int id) {
+        if(id!=levelUpInputModel.getLevelUpId()){
             throw new IllegalArgumentException("Level Up! ID in path must match with request body!");
         }
-        return serviceLayer.updateLevelUp(levelUpViewModel);
+        return serviceLayer.updateLevelUp(levelUpInputModel);
     }
 
     @DeleteMapping(value = "/{id}")
