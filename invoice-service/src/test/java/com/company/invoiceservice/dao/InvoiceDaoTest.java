@@ -1,6 +1,7 @@
 package com.company.invoiceservice.dao;
 
 import com.company.invoiceservice.dto.Invoice;
+import com.company.invoiceservice.dto.InvoiceItem;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,8 +22,14 @@ public class InvoiceDaoTest {
     @Autowired
     InvoiceDao invoiceDao;
 
+    @Autowired
+    InvoiceItemDao invoiceItemDao;
+
     @Before
     public void setUp() throws Exception {
+        List<InvoiceItem> invoiceItems = invoiceItemDao.getAllInvoiceItems();
+        invoiceItems.forEach(invoiceItem -> invoiceItemDao.deleteInvoiceItem(invoiceItem.getInvoiceItemId()));
+
         List<Invoice> invoices = invoiceDao.getAllInvoices();
         invoices.forEach(invoice -> invoiceDao.deleteInvoice(invoice.getInvoiceId()));
     }
@@ -43,7 +50,7 @@ public class InvoiceDaoTest {
     }
 
     @Test
-    public void getAllInvoices() {
+    public void getAllInvoicesAndByCustomerId() {
         //Arranging
         Invoice invoice = new Invoice();
         invoice.setCustomerId(1);
@@ -53,6 +60,10 @@ public class InvoiceDaoTest {
         //Asserting
         assertEquals(invoiceDao.getAllInvoices().size(),1);
         assertEquals(invoiceDao.getAllInvoices().get(0),invoice);
+
+        assertEquals(invoiceDao.getInvoicesByCustomerId(1).size(),1);
+        assertEquals(invoiceDao.getInvoicesByCustomerId(1).get(0),invoice);
+
     }
 
     @Test

@@ -1,11 +1,8 @@
-package com.company.AdminAPI.util.feign;
+package com.company.RetailAPI.util.feign;
 
-import com.company.AdminAPI.views.input.InvoiceInputModel;
+import com.company.RetailAPI.views.input.InvoiceInputModel;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -21,6 +18,9 @@ public interface InvoiceClient {
 
     @RequestMapping(value = "/invoices/{id}", method = RequestMethod.GET)
     public InvoiceInputModel getInvoice(@PathVariable int id);
+
+    @RequestMapping(value = "/invoices/customer/{customerId}", method = RequestMethod.GET)
+    public List<InvoiceInputModel> getInvoicesByCustomer(@PathVariable int customerId);
 
     @RequestMapping(value = "/invoices/{id}", method = RequestMethod.PUT)
     public InvoiceInputModel updateInvoice(@RequestBody @Valid InvoiceInputModel invoiceInputModel, @PathVariable int id);

@@ -65,6 +65,16 @@ public class ServiceLayer {
     }
 
     @Transactional
+    public List<InvoiceViewModel> findInvoicesByCustomer(int customerId){
+        List<Invoice> invoices = invoiceDao.getInvoicesByCustomerId(customerId);
+        List<InvoiceViewModel> invoiceViewModels = new ArrayList<>();
+
+        invoices.forEach(invoice -> invoiceViewModels.add(buildInvoiceViewModel(invoice)));
+
+        return invoiceViewModels;
+    }
+
+    @Transactional
     public InvoiceViewModel updateInvoice(InvoiceViewModel invoiceViewModel){
         //Checking if Inventory exists
         findInvoice(invoiceViewModel.getInvoiceId());

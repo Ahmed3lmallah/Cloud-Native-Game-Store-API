@@ -23,7 +23,8 @@ public class InvoiceItemDaoTest {
     @Autowired
     InvoiceDao invoiceDao;
 
-    @Autowired InvoiceItemDao invoiceItemDao;
+    @Autowired
+    InvoiceItemDao invoiceItemDao;
 
     @Before
     public void setUp() throws Exception {

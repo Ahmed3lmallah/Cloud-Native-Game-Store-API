@@ -8,6 +8,7 @@ public interface InvoiceDao {
     Invoice addInvoice(Invoice invoice);
     Invoice getInvoice(int invoiceId);
     List<Invoice> getAllInvoices();
+    List<Invoice> getInvoicesByCustomerId(int customerID);
     void updateInvoice(Invoice invoice);
     void deleteInvoice(int invoiceId);
 }
