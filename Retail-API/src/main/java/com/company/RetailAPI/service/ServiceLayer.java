@@ -111,6 +111,15 @@ public class ServiceLayer {
         return inventoryViewModels;
     }
 
+    private InventoryViewModel updateInventory(InventoryInputModel inventoryInputModel){
+        // Checking if product exists - throws an exception if not
+        findProduct(inventoryInputModel.getProductId());
+
+        // Updating Inventory
+        System.out.println("Contacting Inventory Service client to update inventory...");
+        return buildInventoryViewModel(inventoryClient.updateInventory(inventoryInputModel, inventoryInputModel.getInventoryId()));
+    }
+
     //
     // Invoice Service Methods
     // --------------------- //
@@ -147,38 +156,13 @@ public class ServiceLayer {
         System.out.println("Contacting Invoice Service client to create invoice...");
         invoiceInputModel = invoiceClient.createInvoice(invoiceInputModel);
 
-        //Building ViewModel...
-        invoiceViewModel.setInvoiceId(invoiceInputModel.getInvoiceId());
-        invoiceViewModel.setPurchaseDate(invoiceInputModel.getPurchaseDate());
-        invoiceInputModel.getInvoiceItems().forEach(invoiceItem -> {
-
-            //Persisting InvoiceItems
-            ProductFromInvoice product = new ProductFromInvoice();
-
-            //Getting Inventory Info
-            InventoryViewModel inventory = findInventory(invoiceItem.getInventoryId());
-
-            //Continuing to Persist...
-            product.setInvoiceId(invoiceItem.getInvoiceId());
-            product.setInvoiceItemId(invoiceItem.getInvoiceItemId());
-            product.setInventoryId(inventory.getInventoryId());
-            product.setProductName(inventory.getProduct().getProductName());
-            product.setProductDescription(inventory.getProduct().getProductDescription());
-            product.setUnitPrice(invoiceItem.getListPrice());
-            product.setQuantity(invoiceItem.getQuantity());
-            invoiceItems.add(product);
-        });
-
-        invoiceViewModel.setInvoiceItems(invoiceItems);
-
         // LevelUp! points
         int result = totalPrice.stream().reduce(BigDecimal.ZERO, BigDecimal::add).intValue();
         points = (result/50)*10;
-
         LevelUpInputModel currentPoints = levelUpClient.getLevelUpByCustomerId(invoiceViewModel.getCustomer().getCustomerId());
-
         currentPoints.setPoints(currentPoints.getPoints()+points);
 
+        // Assigning Points to ViewModel
         if(currentPoints.getLevelUpId()==0){
             currentPoints.setCustomerId(invoiceViewModel.getCustomer().getCustomerId());
             // Adding points to InvoiceViewModel
@@ -188,10 +172,34 @@ public class ServiceLayer {
             invoiceViewModel.setMemberPoints(String.valueOf(currentPoints.getPoints()));
         }
 
-        // Sending to Queue
+        // Sending to Points to Queue
         System.out.println("Updating Level Up! account for customerId: "+currentPoints.getCustomerId());
         rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, (convertLevelUpToInputModel(currentPoints)));
         System.out.println("Msg Sent to Queue to update...");
+
+        //Building ViewModel...
+        invoiceViewModel.setInvoiceId(invoiceInputModel.getInvoiceId());
+        invoiceViewModel.setPurchaseDate(invoiceInputModel.getPurchaseDate());
+        invoiceInputModel.getInvoiceItems().forEach(invoiceItem -> {
+
+            //Getting Inventory Info
+            InventoryViewModel inventory = findInventory(invoiceItem.getInventoryId());
+
+            //Updating Quantity in Inventory
+            inventory.setQuantity(inventory.getQuantity()-invoiceItem.getQuantity());
+            inventory = updateInventory(convertInventoryToInputModel(inventory));
+
+            //Persisting InvoiceItems
+            ProductFromInvoice product = new ProductFromInvoice();
+            product.setInvoiceId(invoiceItem.getInvoiceId());
+            product.setInvoiceItemId(invoiceItem.getInvoiceItemId());
+            product.setInventoryId(inventory.getInventoryId());
+            product.setProductName(inventory.getProduct().getProductName());
+            product.setProductDescription(inventory.getProduct().getProductDescription());
+            product.setUnitPrice(invoiceItem.getListPrice());
+            product.setQuantity(invoiceItem.getQuantity());
+            invoiceItems.add(product); });
+        invoiceViewModel.setInvoiceItems(invoiceItems);
 
         return invoiceViewModel;
     }
@@ -314,5 +322,13 @@ public class ServiceLayer {
         msg.setMemberDate(levelUpInputModel.getMemberDate());
         msg.setPoints(levelUpInputModel.getPoints());
         return msg;
+    }
+
+    private InventoryInputModel convertInventoryToInputModel (InventoryViewModel ivm){
+        InventoryInputModel inventoryInputModel = new InventoryInputModel();
+        inventoryInputModel.setInventoryId(ivm.getInventoryId());
+        inventoryInputModel.setProductId(ivm.getProduct().getProductId());
+        inventoryInputModel.setQuantity(ivm.getQuantity());
+        return inventoryInputModel;
     }
 }

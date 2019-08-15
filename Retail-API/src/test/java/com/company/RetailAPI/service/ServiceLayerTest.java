@@ -101,8 +101,59 @@ public class ServiceLayerTest {
     }
 
     @Test
-    public void testInvoice() {
-        // Test 1 : saveInvoice
+    public void findInvoice() {
+        // Expected Output
+        //// customer
+        CustomerViewModel customer = new CustomerViewModel();
+        customer.setCustomerId(1);
+        customer.setFirstName("Ahmed");
+        customer.setLastName("Elmallah");
+        customer.setStreet("161 Newkirk");
+        customer.setCity("Jersey City");
+        customer.setZip("07100");
+        customer.setPhone("201-100-2000");
+        customer.setEmail("ahmed@elmalah.com");
+        //// invoice items
+        ProductFromInvoice product = new ProductFromInvoice();
+        product.setInvoiceId(31);
+        product.setInvoiceItemId(41);
+        product.setInventoryId(21);
+        product.setProductName("XBOX");
+        product.setProductDescription("Console");
+        product.setUnitPrice(new BigDecimal(250.00));
+        product.setQuantity(1);
+        List<ProductFromInvoice> products = new ArrayList<>();
+        products.add(product);
+        ////invoice
+        InvoiceViewModel expectedOutput = new InvoiceViewModel();
+        expectedOutput.setInvoiceId(31);
+        expectedOutput.setPurchaseDate(LocalDate.of(2019,10,10));
+        expectedOutput.setMemberPoints("1000");
+        expectedOutput.setCustomer(customer);
+        expectedOutput.setInvoiceItems(products);
+
+
+        // Test 1 : findInvoice
+        // ------------------------------------ //
+        InvoiceViewModel fromFind = serviceLayer.findInvoice(31);
+        assertEquals(expectedOutput, fromFind);
+
+        // Test 2 : findAllInvoices
+        // ------------------------------------ //
+        List<InvoiceViewModel> allInvoices = serviceLayer.findAllInvoices();
+        assertEquals(allInvoices.size(),1);
+        assertEquals(allInvoices.get(0), expectedOutput);
+
+        // Test 3 : findInvoicesByCustomer
+        // ------------------------------------ //
+        List<InvoiceViewModel> invoicesByCustomer = serviceLayer.findInvoicesByCustomer(1);
+        assertEquals(invoicesByCustomer.size(),1);
+        assertEquals(invoicesByCustomer.get(0), expectedOutput);
+    }
+
+    @Test
+    public void saveInvoice() {
+        // Test : saveInvoice
         // ------------------------------------ //
         // Input
         //// invoice items
@@ -153,24 +204,6 @@ public class ServiceLayerTest {
 
         // Asserting
         assertEquals(expectedOutput, fromSave);
-
-        // Test 2 : findInvoice
-        // ------------------------------------ //
-        InvoiceViewModel fromFind = serviceLayer.findInvoice(31);
-        assertEquals(expectedOutput, fromFind);
-
-        // Test 3 : findAllInvoices
-        // ------------------------------------ //
-        List<InvoiceViewModel> allInvoices = serviceLayer.findAllInvoices();
-        assertEquals(allInvoices.size(),1);
-        assertEquals(allInvoices.get(0), expectedOutput);
-
-        // Test 4 : findInvoicesByCustomer
-        // ------------------------------------ //
-        List<InvoiceViewModel> invoicesByCustomer = serviceLayer.findInvoicesByCustomer(1);
-        assertEquals(invoicesByCustomer.size(),1);
-        assertEquals(invoicesByCustomer.get(0), expectedOutput);
-
     }
 
     private void setUpCustomerClientMock(){
@@ -207,19 +240,25 @@ public class ServiceLayerTest {
     private void setUpInventoryClientMock(){
         inventoryClient = mock(InventoryClient.class);
 
+        // updated
+        InventoryInputModel updated = new InventoryInputModel();
+        updated.setInventoryId(21);
+        updated.setProductId(11);
+        updated.setQuantity(1);
+
         // output
-        //// Inventory
-        InventoryInputModel inventory = new InventoryInputModel();
-        inventory.setInventoryId(21);
-        inventory.setProductId(11);
-        inventory.setQuantity(2);
+        InventoryInputModel output = new InventoryInputModel();
+        output.setInventoryId(21);
+        output.setProductId(11);
+        output.setQuantity(2);
 
         //// List
         List<InventoryInputModel> inventoryList = new ArrayList<>();
-        inventoryList.add(inventory);
+        inventoryList.add(output);
 
-        doReturn(inventory).when(inventoryClient).getInventory(21);
+        doReturn(output).when(inventoryClient).getInventory(21);
         doReturn(inventoryList).when(inventoryClient).getAllInventories();
+        doReturn(updated).when(inventoryClient).updateInventory(updated, updated.getInventoryId());
     }
 
     private void setUpInvoiceClientMock(){

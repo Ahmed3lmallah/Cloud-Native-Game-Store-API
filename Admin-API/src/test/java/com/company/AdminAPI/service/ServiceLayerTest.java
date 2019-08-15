@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.doReturn;
@@ -33,8 +32,6 @@ public class ServiceLayerTest {
     private InvoiceClient invoiceClient;
     private LevelUpClient levelUpClient;
 
-    private CustomerViewModel customer;
-
     @Before
     public void setUp() {
         setUpCustomerClientMock();
@@ -42,8 +39,6 @@ public class ServiceLayerTest {
         setUpInventoryClientMock();
         setUpInvoiceClientMock();
         setUpLevelUpClientMock();
-
-        customer.setCity("Alexandria");
 
         serviceLayer = new ServiceLayer(customerClient, productClient, inventoryClient, levelUpClient, invoiceClient);
     }
@@ -169,8 +164,8 @@ public class ServiceLayerTest {
 
         // Test 4: updateInventory()
         // ------------------------- //
-        expectedOutput.setQuantity(5);
-        input.setQuantity(5);
+        expectedOutput.setQuantity(1);
+        input.setQuantity(1);
         input.setInventoryId(21);
         fromService = serviceLayer.updateInventory(input);
         assertEquals(expectedOutput, fromService);
@@ -180,24 +175,8 @@ public class ServiceLayerTest {
         assertEquals("Inventory [21] deleted successfully!",serviceLayer.removeInventory(21));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testInvoice() {
-        // SetUp
-        // ----- //
-        // Input
-        //// invoice items
-        InvoiceItem invoiceItemIn = new InvoiceItem();
-        invoiceItemIn.setInventoryId(21);
-        invoiceItemIn.setListPrice(new BigDecimal(250.00));
-        invoiceItemIn.setQuantity(1);
-        List<InvoiceItem> invoiceItemsIn = new ArrayList<>();
-        invoiceItemsIn.add(invoiceItemIn);
-        //// invoice
-        InvoiceInputModel input = new InvoiceInputModel();
-        input.setCustomerId(1);
-        input.setPurchaseDate(LocalDate.of(2019,10,10));
-        input.setInvoiceItems(invoiceItemsIn);
-
+    @Test
+    public void findInvoiceAndFindAll() {
         // Expected Output
         // customer
         CustomerViewModel customer = new CustomerViewModel();
@@ -238,42 +217,157 @@ public class ServiceLayerTest {
         expectedOutput.setCustomer(customer);
         expectedOutput.setInvoiceItems(invoiceItems);
 
-        // Test 1 : saveInvoice()
-        // ---------------------- //
-        InvoiceViewModel fromSave = serviceLayer.saveInvoice(input);
-        assertEquals(expectedOutput, fromSave);
-
-        // Test 2 : findInvoice()
+        // Test 1 : findInvoice()
         // ---------------------- //
         expectedOutput.setMemberPoints(1000);
         InvoiceViewModel fromFind = serviceLayer.findInvoice(31);
         assertEquals(expectedOutput, fromFind);
 
-        // Test 3 : findAllInvoices()
+        // Test 2 : findAllInvoices()
         // -------------------------- //
         List<InvoiceViewModel> allInvoices = serviceLayer.findAllInvoices();
         assertEquals(allInvoices.size(),1);
         assertEquals(allInvoices.get(0), expectedOutput);
+    }
 
-        // Test 4 : updateInvoice()
-        // ------------------------ //
-        expectedOutput.setPurchaseDate(LocalDate.of(2005,5,5));
-        input.setPurchaseDate(LocalDate.of(2005,5,5));
-        input.setInvoiceId(31);
-        invoiceItemIn.setInvoiceId(31);
-        invoiceItemIn.setInvoiceItemId(41);
+    @Test(expected = IllegalArgumentException.class)
+    public void saveInvoice() {
+        // SetUp
+        // ----- //
+        // Input
+        //// invoice items
+        InvoiceItem invoiceItemIn = new InvoiceItem();
+        invoiceItemIn.setInventoryId(21);
+        invoiceItemIn.setListPrice(new BigDecimal(250.00));
+        invoiceItemIn.setQuantity(1);
+        List<InvoiceItem> invoiceItemsIn = new ArrayList<>();
+        invoiceItemsIn.add(invoiceItemIn);
+        //// invoice
+        InvoiceInputModel input = new InvoiceInputModel();
+        input.setCustomerId(1);
+        input.setPurchaseDate(LocalDate.of(2019,10,10));
+        input.setInvoiceItems(invoiceItemsIn);
 
-        InvoiceViewModel fromUpdate = serviceLayer.updateInvoice(input);
-        assertEquals(expectedOutput, fromUpdate);
+        // Expected Output
+        // customer
+        CustomerViewModel customer = new CustomerViewModel();
+        customer.setCustomerId(1);
+        customer.setFirstName("Ahmed");
+        customer.setLastName("Elmallah");
+        customer.setStreet("161 Newkirk");
+        customer.setCity("Jersey City");
+        customer.setZip("07100");
+        customer.setPhone("201-100-2000");
+        customer.setEmail("ahmed@elmalah.com");
+        // product
+        ProductViewModel product = new ProductViewModel();
+        product.setProductId(11);
+        product.setProductName("XBOX");
+        product.setProductDescription("Console");
+        product.setListPrice(new BigDecimal(250.00));
+        product.setUnitCost(new BigDecimal(200.00));
+        // inventory
+        InventoryViewModel inventory = new InventoryViewModel();
+        inventory.setInventoryId(21);
+        inventory.setQuantity(1);
+        inventory.setProduct(product);
+        // invoiceItem
+        InvoiceItemViewModel invoiceItem = new InvoiceItemViewModel();
+        invoiceItem.setInvoiceId(31);
+        invoiceItem.setInvoiceItemId(41);
+        invoiceItem.setInventory(inventory);
+        invoiceItem.setListPrice(new BigDecimal(250.00));
+        invoiceItem.setQuantity(1);
+        List<InvoiceItemViewModel> invoiceItems = new ArrayList<>();
+        invoiceItems.add(invoiceItem);
+        //invoice
+        InvoiceViewModel expectedOutput = new InvoiceViewModel();
+        expectedOutput.setInvoiceId(31);
+        expectedOutput.setPurchaseDate(LocalDate.of(2019,10,10));
+        expectedOutput.setMemberPoints(1050);
+        expectedOutput.setCustomer(customer);
+        expectedOutput.setInvoiceItems(invoiceItems);
 
-        // Test 5 : removeInvoice()
-        // ------------------------ //
-        assertEquals("Invoice [31] deleted successfully!",serviceLayer.removeInvoice(31));
+        // Test 1 : saveInvoice()
+        // ---------------------- //
+        InvoiceViewModel fromSave = serviceLayer.saveInvoice(input);
+        assertEquals(expectedOutput, fromSave);
 
-        // Test 6: Order Quantity larger than Inventory
+        // Test 2: Order Quantity larger than Inventory
         // Should throw an illegalArgumentException
         invoiceItemIn.setQuantity(100);
         serviceLayer.saveInvoice(input);
+    }
+
+    @Test
+    public void updateAndRemoveInvoice(){
+        // SetUp
+        // ----- //
+        // Input
+        //// invoice items
+        InvoiceItem invoiceItemIn = new InvoiceItem();
+        invoiceItemIn.setInvoiceId(31);
+        invoiceItemIn.setInvoiceItemId(41);
+        invoiceItemIn.setInventoryId(21);
+        invoiceItemIn.setListPrice(new BigDecimal(250.00));
+        invoiceItemIn.setQuantity(1);
+        List<InvoiceItem> invoiceItemsIn = new ArrayList<>();
+        invoiceItemsIn.add(invoiceItemIn);
+        //// invoice
+        InvoiceInputModel input = new InvoiceInputModel();
+        input.setInvoiceId(31);
+        input.setCustomerId(1);
+        input.setPurchaseDate(LocalDate.of(2005,5,5));
+        input.setInvoiceItems(invoiceItemsIn);
+
+        // Expected Output
+        // customer
+        CustomerViewModel customer = new CustomerViewModel();
+        customer.setCustomerId(1);
+        customer.setFirstName("Ahmed");
+        customer.setLastName("Elmallah");
+        customer.setStreet("161 Newkirk");
+        customer.setCity("Jersey City");
+        customer.setZip("07100");
+        customer.setPhone("201-100-2000");
+        customer.setEmail("ahmed@elmalah.com");
+        // product
+        ProductViewModel product = new ProductViewModel();
+        product.setProductId(11);
+        product.setProductName("XBOX");
+        product.setProductDescription("Console");
+        product.setListPrice(new BigDecimal(250.00));
+        product.setUnitCost(new BigDecimal(200.00));
+        // inventory
+        InventoryViewModel inventory = new InventoryViewModel();
+        inventory.setInventoryId(21);
+        inventory.setQuantity(2);
+        inventory.setProduct(product);
+        // invoiceItem
+        InvoiceItemViewModel invoiceItem = new InvoiceItemViewModel();
+        invoiceItem.setInvoiceId(31);
+        invoiceItem.setInvoiceItemId(41);
+        invoiceItem.setInventory(inventory);
+        invoiceItem.setListPrice(new BigDecimal(250.00));
+        invoiceItem.setQuantity(1);
+        List<InvoiceItemViewModel> invoiceItems = new ArrayList<>();
+        invoiceItems.add(invoiceItem);
+        //invoice
+        InvoiceViewModel expectedOutput = new InvoiceViewModel();
+        expectedOutput.setInvoiceId(31);
+        expectedOutput.setPurchaseDate(LocalDate.of(2005,5,5));
+        expectedOutput.setMemberPoints(1000);
+        expectedOutput.setCustomer(customer);
+        expectedOutput.setInvoiceItems(invoiceItems);
+
+        // Test 1 : updateInvoice()
+        // ------------------------ //
+        InvoiceViewModel fromUpdate = serviceLayer.updateInvoice(input);
+        assertEquals(expectedOutput, fromUpdate);
+
+        // Test 2 : removeInvoice()
+        // ------------------------ //
+        assertEquals("Invoice [31] deleted successfully!",serviceLayer.removeInvoice(31));
     }
 
     private void setUpCustomerClientMock(){
@@ -325,7 +419,7 @@ public class ServiceLayerTest {
         InventoryInputModel updated = new InventoryInputModel();
         updated.setInventoryId(21);
         updated.setProductId(11);
-        updated.setQuantity(5);
+        updated.setQuantity(1);
 
         //// List
         List<InventoryInputModel> inventoryList = new ArrayList<>();

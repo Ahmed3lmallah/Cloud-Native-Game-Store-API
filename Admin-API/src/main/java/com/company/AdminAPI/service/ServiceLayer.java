@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,8 +43,18 @@ public class ServiceLayer {
     // Customer Service Methods
     // --------------------- //
     public CustomerViewModel saveCustomer(CustomerViewModel customerViewModel){
+        //Creating A new Customer
         System.out.println("Contacting Customer Service client to add customer...");
-        return customerClient.createCustomer(customerViewModel);
+        CustomerViewModel customer = customerClient.createCustomer(customerViewModel);
+
+        //Creating A new LevelUp! Account
+        LevelUpInputModel newAccount = new LevelUpInputModel();
+        newAccount.setCustomerId(customer.getCustomerId());
+        newAccount.setMemberDate(LocalDate.now());
+        newAccount.setPoints(0);
+        saveLevelUp(newAccount);
+
+        return customer;
     }
 
     public CustomerViewModel findCustomer(int customerId){
@@ -190,9 +201,6 @@ public class ServiceLayer {
         int points;
         List<BigDecimal> totalPrice = new ArrayList<>();
 
-        // Checking if customer exists - throws an exception if not
-        checkForCustomer(invoiceInputModel.getCustomerId());
-
         // Assign Customer
         invoiceViewModel.setCustomer(findCustomer(invoiceInputModel.getCustomerId()));
 
@@ -217,30 +225,35 @@ public class ServiceLayer {
         System.out.println("Contacting Invoice Service client to create invoice...");
         invoiceInputModel = invoiceClient.createInvoice(invoiceInputModel);
 
+        // LevelUp! points
+        int result = totalPrice.stream().reduce(BigDecimal.ZERO, BigDecimal::add).intValue();
+        points = (result/50)*10;
+        LevelUpViewModel currentPoints = findLevelUpByCustomerId(invoiceViewModel.getCustomer().getCustomerId());
+        currentPoints.setPoints(currentPoints.getPoints()+points);
+        currentPoints = updateLevelUp(convertLevelUpToInputModel(currentPoints));
+
         //Building ViewModel...
         invoiceViewModel.setInvoiceId(invoiceInputModel.getInvoiceId());
         invoiceViewModel.setPurchaseDate(invoiceInputModel.getPurchaseDate());
+        invoiceViewModel.setMemberPoints(currentPoints.getPoints());
         invoiceInputModel.getInvoiceItems().forEach(invoiceItem -> {
+
+            //Getting Inventory Info
+            InventoryViewModel inventory = findInventory(invoiceItem.getInventoryId());
+
+            //Updating Quantity in Inventory
+            inventory.setQuantity(inventory.getQuantity()-invoiceItem.getQuantity());
+            inventory = updateInventory(convertInventoryToInputModel(inventory));
+
             //Persisting InvoiceItems
             InvoiceItemViewModel invoiceItemViewModel = new InvoiceItemViewModel();
             invoiceItemViewModel.setInvoiceId(invoiceItem.getInvoiceId());
             invoiceItemViewModel.setInvoiceItemId(invoiceItem.getInvoiceItemId());
             invoiceItemViewModel.setListPrice(invoiceItem.getListPrice());
             invoiceItemViewModel.setQuantity(invoiceItem.getQuantity());
-            invoiceItemViewModel.setInventory(findInventory(invoiceItem.getInventoryId()));
-            invoiceItems.add(invoiceItemViewModel);
-        });
+            invoiceItemViewModel.setInventory(inventory);
+            invoiceItems.add(invoiceItemViewModel); });
         invoiceViewModel.setInvoiceItems(invoiceItems);
-
-        // LevelUp! points
-        int result = totalPrice.stream().reduce(BigDecimal.ZERO, BigDecimal::add).intValue();
-        points = (result/50)*10;
-
-        LevelUpViewModel currentPoints = findLevelUpByCustomerId(invoiceViewModel.getCustomer().getCustomerId());
-        currentPoints.setPoints(currentPoints.getPoints()+points);
-        currentPoints = updateLevelUp(convertLevelUptoInputModel(currentPoints));
-
-        invoiceViewModel.setMemberPoints(currentPoints.getPoints());
 
         return invoiceViewModel;
     }
@@ -377,12 +390,20 @@ public class ServiceLayer {
         return invoiceViewModel;
     }
 
-    private LevelUpInputModel convertLevelUptoInputModel(LevelUpViewModel levelUpViewModel){
+    private LevelUpInputModel convertLevelUpToInputModel(LevelUpViewModel levelUpViewModel){
         LevelUpInputModel levelUpInputModel = new LevelUpInputModel();
         levelUpInputModel.setLevelUpId(levelUpViewModel.getLevelUpId());
         levelUpInputModel.setCustomerId(levelUpViewModel.getCustomer().getCustomerId());
         levelUpInputModel.setMemberDate(levelUpViewModel.getMemberDate());
         levelUpInputModel.setPoints(levelUpViewModel.getPoints());
         return levelUpInputModel;
+    }
+
+    private InventoryInputModel convertInventoryToInputModel (InventoryViewModel ivm){
+        InventoryInputModel inventoryInputModel = new InventoryInputModel();
+        inventoryInputModel.setInventoryId(ivm.getInventoryId());
+        inventoryInputModel.setProductId(ivm.getProduct().getProductId());
+        inventoryInputModel.setQuantity(ivm.getQuantity());
+        return inventoryInputModel;
     }
 }
