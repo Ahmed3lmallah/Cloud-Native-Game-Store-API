@@ -442,7 +442,7 @@ paths:
         '404':
           description: LevelUp Entry ID cannot be found in DB.
           
-  /invoice:
+  /invoices:
     get:
       summary: Retrieves All Invoices from the database
       responses:
@@ -472,7 +472,7 @@ paths:
         '422':
           description: Incomplete Invoice information.
           
-  /invoice/{id}:
+  /invoices/{id}:
     get:
       summary: Retrieves the Invoice with the given ID.
       parameters:
@@ -544,7 +544,28 @@ paths:
           description: Invoice ID cannot be found in DB.
         '422':
           description: Incomplete Invoice information [OR] Ids doesn't match.
-          
+  
+  /invoices/customer/{customerId}:
+    get:
+      summary: Retrieves All Invoices for a given customer by customer Id.
+      parameters: 
+        - name: customerId
+          in: path
+          required: true
+          description: id of the customer you want to get invoices for.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: A list of Invoices.
+          content:
+            array:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceViewModel'        
 components:
   schemas:
     
