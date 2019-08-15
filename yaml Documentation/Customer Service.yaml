@@ -1,0 +1,141 @@
+openapi: 3.0.0
+info:
+  title: Customer Service
+  description:
+    This is a microservice that contains all the CRUD functionality for Customers. 
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:7005'
+    description: Localhost - Port No. 7005
+paths:
+  /customers:
+    get:
+      summary: Retrieves All Customers from the database
+      responses:
+        '200':
+          description: A list of Customers
+          content:
+            array:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+    post:
+      summary: Creates a new Customer entry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '201':
+          description: A Customer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '422':
+          description: Incomplete Customer information.
+          
+  /customers/{id}:
+    get:
+      summary: Retrieves the Customer with the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Customer you would like to retrieve.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: A Customer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          description: Customer ID cannot be found in DB.
+    
+    delete:
+      summary: Deletes the Customer with the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Customer you would like to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: success message.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Customer [1] deleted successfully!"
+        '404':
+          description: Customer ID cannot be found in DB.
+          
+    put:
+      summary: Update the Customer with the given ID.
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: id of the Customer you want to update
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '200':
+          description: A Customer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          description: Customer ID cannot be found in DB.
+        '422':
+          description: Incomplete Customer information [OR] Ids doesn't match.
+          
+components:
+  schemas:
+    Customer:
+      properties:
+        customerId:
+          type: integer
+        firstName: 
+          type: string
+        lastName:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+      required: 
+        - firstName
+        - lastName
+        - street
+        - city
+        - zip
+        - email
+        - phone

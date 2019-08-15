@@ -1,0 +1,257 @@
+openapi: 3.0.0
+info:
+  title: Retail Api Service
+  description:
+    The Retail API is a BFF edge service that contains all API endpoints for searching inventory and purchasing products. This API does not require authentication.
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:8181'
+    description: Localhost - Port No. 8181
+paths:
+  /invoices:
+    get:
+      summary: Retrieves All Invoices
+      responses:
+        '200':
+          description: A list of Invoices.
+          content:
+            array:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceViewModel'
+    post:
+      summary: Creates a new Invoice entry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceInputModel'
+      responses:
+        '201':
+          description: An Invoice Item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceViewModel'
+        '422':
+          description: Incomplete Invoice information.
+        '404':
+          description: Customer or inventory item cannot be found in DB.
+          
+  /invoices/{id}:
+    get:
+      summary: Retrieves the Invoice by the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Invoice Item you would like to retrieve.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: An Invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceViewModel'
+        '404':
+          description: Invoice ID cannot be found in DB.
+          
+  /invoices/customer/{customerId}:
+    get:
+      summary: Retrieves all Invoices by the given Customer ID.
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID of the Invoices you would like to retrieve.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: A list of Invoices.
+          content:
+            array:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceViewModel'
+  
+  /products/inventory:
+    get:
+      summary: Retrieves All Products in Inventory
+      responses:
+        '200':
+          description: A list of Products.
+          content:
+            array:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductFromInventory'
+                  
+  /products/{id}:
+    get:
+      summary: Retrieves a Product from inventory by the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Product you would like to retrieve.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: A Product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductFromInventory'
+        '404':
+          description: Product ID cannot be found in DB.
+          
+  /products/invoice/{id}:
+    get:
+      summary: Retrieves All Products in Invoice by Invoice Id.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Invoice ID of the products you would like to retrieve.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: A list of Products.
+          content:
+            array:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductFromInvoice'
+                  
+  /levelup/customer/{customerId}:
+    get:
+      summary: Retrieves the Level Up! Entry by the given Customer ID.
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: ID of the customer you would like to retrieve levelUp! points for.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: A LevelUp Entry
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Customer points: 320"
+            
+        '404':
+          description: Entry cannot be found in DB.
+          
+components:
+  schemas:
+    ProductFromInventory:
+      properties:
+        inventoryId:
+          type: integer
+        productName: 
+          type: string
+        productDescription :
+          type: string
+        listPrice:
+          type: number
+        quantity:
+          type: integer
+          
+    ProductFromInvoice:
+      properties:
+        invoiceId:
+          type: integer
+        invoiceItemId:
+          type: integer
+        inventoryId:
+          type: integer
+        productName: 
+          type: string
+        productDescription :
+          type: string
+        unitPrice:
+          type: number
+        quantity:
+          type: integer
+          
+    InvoiceInputModel:
+      properties:
+        customerId:
+          type: integer
+        purchaseDate:
+          type: string
+        invoiceItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItem'
+      required: 
+        - customerId
+        - purchaseDate
+        - invoiceItems
+    InvoiceItem:
+      properties:
+        inventoryId:
+          type: integer
+        quantity:
+          type: integer
+      required: 
+        - inventoryId
+        - quantity
+        
+    InvoiceViewModel:
+      properties:
+        invoiceId:
+          type: integer
+        customer:
+          $ref: '#/components/schemas/Customer'
+        purchaseDate:
+          type: string
+        invoiceItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductFromInvoice'
+        memberPoints:
+          type: string
+    
+    Customer:
+      properties:
+        customerId:
+          type: integer
+        firstName: 
+          type: string
+        lastName:
+          type: string
+        street: 
+          type: string
+        city:
+          type: string
+        zip: 
+          type: string
+        email:
+          type: string
+        phone: 
+          type: string
+        

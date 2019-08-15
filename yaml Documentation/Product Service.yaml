@@ -1,0 +1,132 @@
+openapi: 3.0.0
+info:
+  title: Product Service
+  description:
+    This is a microservice that contains all the CRUD functionality for Products. This service contains information on all the Products that the company has sold in the past and may sell in the future. This service does not contain information about current inventory levels.
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:7004'
+    description: Localhost - Port No. 7004
+paths:
+  /products:
+    get:
+      summary: Retrieves All Products from the database
+      responses:
+        '200':
+          description: A list of Products
+          content:
+            array:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      summary: Creates a new Product entry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: A Product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '422':
+          description: Incomplete Product information.
+          
+  /products/{id}:
+    get:
+      summary: Retrieves the Product with the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Product you would like to retrieve.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: A Product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product ID cannot be found in DB.
+    
+    delete:
+      summary: Deletes the Product with the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Product you would like to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: success message.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Product [1] deleted successfully!"
+        '404':
+          description: Product ID cannot be found in DB.
+          
+    put:
+      summary: Update the Product with the given ID.
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: id of the Product you want to update
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: A Product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product ID cannot be found in DB.
+        '422':
+          description: Incomplete Product information [OR] Ids doesn't match.
+          
+components:
+  schemas:
+    Product:
+      properties:
+        productId:
+          type: integer
+        productName: 
+          type: string
+        productDescription :
+          type: string
+        listPrice:
+          type: number
+        unitCost:
+          type: number
+      required: 
+        - productName
+        - productDescription
+        - listPrice
+        - unitCost

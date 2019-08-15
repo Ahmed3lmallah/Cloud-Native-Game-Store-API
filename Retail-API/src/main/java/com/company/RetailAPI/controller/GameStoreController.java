@@ -6,6 +6,7 @@ import com.company.RetailAPI.views.output.InvoiceViewModel;
 import com.company.RetailAPI.views.products.ProductFromInventory;
 import com.company.RetailAPI.views.products.ProductFromInvoice;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@RefreshScope
 public class GameStoreController {
 
     @Autowired
@@ -61,7 +63,7 @@ public class GameStoreController {
         return serviceLayer.getProductFromInventory(id);
 }
     // From Invoice
-    @RequestMapping(value = "/products/invoices/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/products/invoice/{id}", method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
     public List<ProductFromInvoice> getProductByInvoiceId(@PathVariable int id) {
         return serviceLayer.findInvoice(id).getInvoiceItems();

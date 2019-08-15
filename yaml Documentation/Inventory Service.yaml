@@ -1,0 +1,126 @@
+openapi: 3.0.0
+info:
+  title: Inventory Service
+  description:
+    This is a microservice that contains all CRUD functionality for inventory.
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:7003'
+    description: Localhost - Port No. 7003
+paths:
+  /inventory:
+    get:
+      summary: Retrieves All Inventory Items from the database
+      responses:
+        '200':
+          description: A list of Inventory Items.
+          content:
+            array:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Inventory'
+    post:
+      summary: Creates a new Inventory entry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Inventory'
+      responses:
+        '201':
+          description: An Inventory Item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inventory'
+        '422':
+          description: Incomplete Inventory Item information.
+          
+  /inventory/{id}:
+    get:
+      summary: Retrieves the Inventory Item with the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Inventory Item you would like to retrieve.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: An Inventory Item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inventory'
+        '404':
+          description: Inventory Item ID cannot be found in DB.
+    
+    delete:
+      summary: Deletes the Inventory Item with the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Inventory Item you would like to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: success message.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Inventory [1] deleted successfully!"
+        '404':
+          description: Inventory Item ID cannot be found in DB.
+          
+    put:
+      summary: Update the Inventory Item with the given ID.
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: id of the Inventory Item you want to update
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Inventory'
+      responses:
+        '200':
+          description: An Inventory Item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inventory'
+        '404':
+          description: Inventory Item ID cannot be found in DB.
+        '422':
+          description: Incomplete Inventory Item information [OR] Ids doesn't match.
+          
+components:
+  schemas:
+    Inventory:
+      properties:
+        inventoryId:
+          type: integer
+        productId:
+          type: integer
+        quantity:
+          type: integer
+      required: 
+        - productId
+        - quantity
