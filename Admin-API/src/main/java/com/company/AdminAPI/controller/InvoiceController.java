@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RefreshScope
-@RequestMapping(value = "/invoice")
+@RequestMapping(value = "/invoices")
 public class InvoiceController {
 
     @Autowired
@@ -36,6 +36,12 @@ public class InvoiceController {
     @ResponseStatus(value = HttpStatus.OK)
     public InvoiceViewModel getInvoice(@PathVariable int id) {
         return serviceLayer.findInvoice(id);
+    }
+
+    @GetMapping(value = "/customer/{id}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<InvoiceViewModel> getInvoicesByCustomerId(@PathVariable int id) {
+        return serviceLayer.findInvoicesByCustomer(id);
     }
 
     @PutMapping(value = "/{id}")

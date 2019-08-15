@@ -14,20 +14,20 @@ import java.util.List;
 public interface LevelUpClient {
 
     @RequestMapping(value = "/levelup", method = RequestMethod.GET)
-    public List<LevelUpInputModel> getAllLevelUps();
+    List<LevelUpInputModel> getAllLevelUps();
 
     @RequestMapping(value = "/levelup", method = RequestMethod.POST)
-    public LevelUpInputModel createLevelUp(@RequestBody @Valid LevelUpInputModel levelUpInputModel);
+    LevelUpInputModel createLevelUp(@RequestBody @Valid LevelUpInputModel levelUpInputModel);
 
     @RequestMapping(value = "/levelup/{id}", method = RequestMethod.GET)
-    public LevelUpInputModel getLevelUp(@PathVariable int id);
+    LevelUpInputModel getLevelUp(@PathVariable int id);
 
     @RequestMapping(value = "/levelup/customer/{customerId}", method = RequestMethod.GET)
-    public LevelUpInputModel getLevelUpByCustomerId(@PathVariable int customerId);
+    LevelUpInputModel getLevelUpByCustomerId(@PathVariable int customerId);
 
     @RequestMapping(value = "/levelup/{id}", method = RequestMethod.PUT)
-    public LevelUpInputModel updateLevelUp(@RequestBody @Valid LevelUpInputModel levelUpInputModel, @PathVariable int id);
+    LevelUpInputModel updateLevelUp(@RequestBody @Valid LevelUpInputModel levelUpInputModel, @PathVariable int id);
 
     @RequestMapping(value = "/levelup/{id}", method = RequestMethod.DELETE)
-    public String deleteLevelUp(@PathVariable int id);
+    String deleteLevelUp(@PathVariable int id);
 }

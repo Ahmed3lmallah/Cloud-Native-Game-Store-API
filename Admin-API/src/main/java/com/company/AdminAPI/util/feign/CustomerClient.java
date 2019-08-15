@@ -11,17 +11,17 @@ import java.util.List;
 public interface CustomerClient {
 
     @RequestMapping(value = "/customers", method = RequestMethod.GET)
-    public List<CustomerViewModel> getAllCustomers();
+    List<CustomerViewModel> getAllCustomers();
 
     @RequestMapping(value = "/customers", method = RequestMethod.POST)
-    public CustomerViewModel createCustomer(@RequestBody @Valid CustomerViewModel customerViewModel);
+    CustomerViewModel createCustomer(@RequestBody @Valid CustomerViewModel customerViewModel);
 
     @RequestMapping(value = "/customers/{id}", method = RequestMethod.GET)
-    public CustomerViewModel getCustomer(@PathVariable int id);
+    CustomerViewModel getCustomer(@PathVariable int id);
 
     @RequestMapping(value = "/customers/{id}", method = RequestMethod.PUT)
-    public CustomerViewModel updateCustomer(@RequestBody @Valid CustomerViewModel customerViewModel, @PathVariable int id);
+    CustomerViewModel updateCustomer(@RequestBody @Valid CustomerViewModel customerViewModel, @PathVariable int id);
 
     @RequestMapping(value = "/customers/{id}", method = RequestMethod.DELETE)
-    public String deleteCustomer(@PathVariable int id);
+    String deleteCustomer(@PathVariable int id);
 }

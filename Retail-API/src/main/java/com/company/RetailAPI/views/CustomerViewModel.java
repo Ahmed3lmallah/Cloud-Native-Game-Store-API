@@ -1,24 +1,16 @@
 package com.company.RetailAPI.views;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.Objects;
 
 public class CustomerViewModel {
 
     private int customerId;
-    @NotEmpty(message = "Must provide firstName!")
     private String firstName;
-    @NotEmpty(message = "Must provide lastName!")
     private String lastName;
-    @NotEmpty(message = "Must provide Street Address!")
     private String street;
-    @NotEmpty(message = "Must provide city!")
     private String city;
-    @NotEmpty(message = "Must provide zipcode!")
     private String zip;
-    @NotEmpty(message = "Must provide email!")
     private String email;
-    @NotEmpty(message = "Must provide phone!")
     private String phone;
 
     @Override

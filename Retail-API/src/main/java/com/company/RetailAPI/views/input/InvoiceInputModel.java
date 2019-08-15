@@ -14,8 +14,8 @@ public class InvoiceInputModel {
     private int customerId;
     @NotNull(message = "Must provide purchaseDate!")
     private LocalDate purchaseDate;
-    @Valid
-    private List<InvoiceItem> invoiceItems;
+    @NotNull(message = "Must provide invoiceItems")
+    private List<@Valid InvoiceItem> invoiceItems;
 
     @Override
     public boolean equals(Object o) {

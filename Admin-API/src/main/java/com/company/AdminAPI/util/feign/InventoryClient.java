@@ -11,17 +11,17 @@ import java.util.List;
 public interface InventoryClient {
 
     @RequestMapping(value = "/inventory", method = RequestMethod.GET)
-    public List<InventoryInputModel> getAllInventories();
+    List<InventoryInputModel> getAllInventories();
 
     @RequestMapping(value = "/inventory", method = RequestMethod.POST)
-    public InventoryInputModel createInventory(@RequestBody @Valid InventoryInputModel inventoryInputModel);
+    InventoryInputModel createInventory(@RequestBody @Valid InventoryInputModel inventoryInputModel);
 
     @RequestMapping(value = "/inventory/{id}", method = RequestMethod.GET)
-    public InventoryInputModel getInventory(@PathVariable int id);
+    InventoryInputModel getInventory(@PathVariable int id);
 
     @RequestMapping(value = "/inventory/{id}", method = RequestMethod.PUT)
-    public InventoryInputModel updateInventory(@RequestBody @Valid InventoryInputModel inventoryInputModel, @PathVariable int id);
+    InventoryInputModel updateInventory(@RequestBody @Valid InventoryInputModel inventoryInputModel, @PathVariable int id);
 
     @RequestMapping(value = "/inventory/{id}", method = RequestMethod.DELETE)
-    public String deleteInventory(@PathVariable int id);
+    String deleteInventory(@PathVariable int id);
 }

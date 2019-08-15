@@ -1,29 +1,29 @@
-package com.company.RetailAPI.views.input;
+package com.company.RetailAPI.util.messages;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
-public class LevelUpInputModel {
+public class LevelUpMsg {
 
     private int levelUpId;
     private int customerId;
     private int points;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate memberDate;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        LevelUpInputModel that = (LevelUpInputModel) o;
-        return getLevelUpId() == that.getLevelUpId() &&
-                getCustomerId() == that.getCustomerId() &&
-                getPoints() == that.getPoints() &&
-                Objects.equals(getMemberDate(), that.getMemberDate());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getLevelUpId(), getCustomerId(), getPoints(), getMemberDate());
+    public String toString() {
+        return "LevelUpMsg{" +
+                "levelUpId=" + levelUpId +
+                ", customerId=" + customerId +
+                ", points=" + points +
+                ", memberDate=" + memberDate +
+                '}';
     }
 
     public int getLevelUpId() {

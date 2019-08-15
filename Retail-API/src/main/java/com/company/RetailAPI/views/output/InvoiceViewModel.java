@@ -13,7 +13,7 @@ public class InvoiceViewModel {
     private CustomerViewModel customer;
     private LocalDate purchaseDate;
     private List<ProductFromInvoice> invoiceItems;
-    private int memberPoints;
+    private String memberPoints;
 
     @Override
     public boolean equals(Object o) {
@@ -21,10 +21,10 @@ public class InvoiceViewModel {
         if (o == null || getClass() != o.getClass()) return false;
         InvoiceViewModel that = (InvoiceViewModel) o;
         return getInvoiceId() == that.getInvoiceId() &&
-                getMemberPoints() == that.getMemberPoints() &&
                 Objects.equals(getCustomer(), that.getCustomer()) &&
                 Objects.equals(getPurchaseDate(), that.getPurchaseDate()) &&
-                Objects.equals(getInvoiceItems(), that.getInvoiceItems());
+                Objects.equals(getInvoiceItems(), that.getInvoiceItems()) &&
+                Objects.equals(getMemberPoints(), that.getMemberPoints());
     }
 
     @Override
@@ -64,11 +64,11 @@ public class InvoiceViewModel {
         this.invoiceItems = invoiceItems;
     }
 
-    public int getMemberPoints() {
+    public String getMemberPoints() {
         return memberPoints;
     }
 
-    public void setMemberPoints(int memberPoints) {
+    public void setMemberPoints(String memberPoints) {
         this.memberPoints = memberPoints;
     }
 }

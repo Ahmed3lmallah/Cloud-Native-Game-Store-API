@@ -14,18 +14,18 @@ import java.util.List;
 public interface ProductClient {
 
     @RequestMapping(value = "/products", method = RequestMethod.GET)
-    public List<ProductViewModel> getAllProducts();
+    List<ProductViewModel> getAllProducts();
 
     @RequestMapping(value = "/products", method = RequestMethod.POST)
-    public ProductViewModel createProduct(@RequestBody @Valid ProductViewModel productViewModel);
+    ProductViewModel createProduct(@RequestBody @Valid ProductViewModel productViewModel);
 
     @RequestMapping(value = "/products/{id}", method = RequestMethod.GET)
-    public ProductViewModel getProduct(@PathVariable int id);
+    ProductViewModel getProduct(@PathVariable int id);
 
     @RequestMapping(value = "/products/{id}", method = RequestMethod.PUT)
-    public ProductViewModel updateProduct(@RequestBody @Valid ProductViewModel productViewModel, @PathVariable int id);
+    ProductViewModel updateProduct(@RequestBody @Valid ProductViewModel productViewModel, @PathVariable int id);
 
     @RequestMapping(value = "/products/{id}", method = RequestMethod.DELETE)
-    public String deleteProduct(@PathVariable int id);
+    String deleteProduct(@PathVariable int id);
 
 }

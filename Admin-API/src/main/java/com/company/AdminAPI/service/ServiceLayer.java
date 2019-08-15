@@ -13,6 +13,7 @@ import com.company.AdminAPI.views.output.LevelUpViewModel;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -253,6 +254,19 @@ public class ServiceLayer {
         // Getting invoices list
         System.out.println("Contacting Invoice Service client to get all invoices...");
         List<InvoiceInputModel> fromInvoiceService = invoiceClient.getAllInvoices();
+
+        // Building ViewModels
+        List<InvoiceViewModel> invoiceViewModels = new ArrayList<>();
+        fromInvoiceService.forEach(invoice -> invoiceViewModels.add(buildInvoiceViewModel(invoice)));
+
+        return invoiceViewModels;
+    }
+
+    @Transactional
+    public List<InvoiceViewModel> findInvoicesByCustomer(int customerId){
+        // Getting invoices list
+        System.out.println("Contacting Invoice Service client to get all invoices for customer...");
+        List<InvoiceInputModel> fromInvoiceService = invoiceClient.getInvoicesByCustomer(customerId);
 
         // Building ViewModels
         List<InvoiceViewModel> invoiceViewModels = new ArrayList<>();

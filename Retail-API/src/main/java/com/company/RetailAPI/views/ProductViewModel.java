@@ -1,19 +1,13 @@
 package com.company.RetailAPI.views;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Objects;
 
 public class ProductViewModel {
     private int productId;
-    @NotEmpty(message = "Must provide productName!")
     private String productName;
-    @NotEmpty(message = "Must provide productDescription!")
     private String productDescription;
-    @NotNull(message = "Must provide listPrice!")
     private BigDecimal listPrice;
-    @NotNull(message = "Must provide unitCost!")
     private BigDecimal unitCost;
 
     @Override

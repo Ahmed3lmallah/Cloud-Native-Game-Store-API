@@ -1,7 +1,7 @@
 package com.company.RetailAPI.service;
 
-import com.company.RetailAPI.exception.NotFoundException;
 import com.company.RetailAPI.util.feign.*;
+import com.company.RetailAPI.util.messages.LevelUpMsg;
 import com.company.RetailAPI.views.CustomerViewModel;
 import com.company.RetailAPI.views.ProductViewModel;
 import com.company.RetailAPI.views.input.InventoryInputModel;
@@ -12,9 +12,10 @@ import com.company.RetailAPI.views.output.InvoiceViewModel;
 import com.company.RetailAPI.views.output.LevelUpViewModel;
 import com.company.RetailAPI.views.products.ProductFromInventory;
 import com.company.RetailAPI.views.products.ProductFromInvoice;
-import feign.FeignException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -24,6 +25,16 @@ import java.util.List;
 @Service
 public class ServiceLayer {
 
+    //
+    // Queue Info
+    // ------------------------- //
+    private static final String EXCHANGE = "level-up-exchange";
+    private static final String ROUTING_KEY = "level-up.update.Retail";
+
+    //
+    // Properties
+    // ------------------------- //
+    private RabbitTemplate rabbitTemplate;
     private CustomerClient customerClient;
     private ProductClient productClient;
     private InventoryClient inventoryClient;
@@ -31,7 +42,8 @@ public class ServiceLayer {
     private InvoiceClient invoiceClient;
 
     @Autowired
-    public ServiceLayer(CustomerClient customerClient, ProductClient productClient, InventoryClient inventoryClient, LevelUpClient levelUpClient, InvoiceClient invoiceClient) {
+    public ServiceLayer(RabbitTemplate rabbitTemplate, CustomerClient customerClient, ProductClient productClient, InventoryClient inventoryClient, LevelUpClient levelUpClient, InvoiceClient invoiceClient) {
+        this.rabbitTemplate = rabbitTemplate;
         this.customerClient = customerClient;
         this.productClient = productClient;
         this.inventoryClient = inventoryClient;
@@ -40,41 +52,18 @@ public class ServiceLayer {
     }
 
     //
-    // Customer Service Methods
-    // --------------------- //
-    private CustomerViewModel findCustomer(int customerId){
-        System.out.println("Contacting Customer Service client to get customer...");
-        return customerClient.getCustomer(customerId);
-    }
-
-    //
-    // Product Service Methods
-    // --------------------- //
-    private ProductViewModel findProduct(int productId){
-        System.out.println("Contacting Product Service client to get product...");
-        return productClient.getProduct(productId);
-    }
-
-    //
     // Level Up! Service Methods
     // --------------------- //
+    @Transactional
     public LevelUpViewModel findLevelUpByCustomerId(int customerId){
         System.out.println("Contacting Level Up! Service client to get Level Up! entry...");
         return buildLevelUpViewModel(levelUpClient.getLevelUpByCustomerId(customerId));
     }
 
-    private LevelUpViewModel updateLevelUp(LevelUpInputModel levelUpInputModel){
-        // Checking if customer exists - throws an exception if not
-        checkForCustomer(levelUpInputModel.getCustomerId());
-
-        // Updating LevelUp!
-        System.out.println("Contacting Level Up! Service client to update Level Up! entry...");
-        return buildLevelUpViewModel(levelUpClient.updateLevelUp(levelUpInputModel, levelUpInputModel.getLevelUpId()));
-    }
-
     //
     // Inventory Service Methods
     // --------------------- //
+    @Transactional
     public ProductFromInventory getProductFromInventory(int id){
         InventoryViewModel inventoryItem = findInventory(id);
 
@@ -88,6 +77,7 @@ public class ServiceLayer {
         return product;
     }
 
+    @Transactional
     public List<ProductFromInventory> getAllProductsFromInventory(){
         List<InventoryViewModel> inventoryItems = findAllInventories();
         List<ProductFromInventory> products = new ArrayList<>();
@@ -124,6 +114,7 @@ public class ServiceLayer {
     //
     // Invoice Service Methods
     // --------------------- //
+    @Transactional
     public InvoiceViewModel saveInvoice(InvoiceInputModel invoiceInputModel){
 
         // initializing...
@@ -167,7 +158,7 @@ public class ServiceLayer {
             //Getting Inventory Info
             InventoryViewModel inventory = findInventory(invoiceItem.getInventoryId());
 
-            //Persisting
+            //Continuing to Persist...
             product.setInvoiceId(invoiceItem.getInvoiceId());
             product.setInvoiceItemId(invoiceItem.getInvoiceItemId());
             product.setInventoryId(inventory.getInventoryId());
@@ -184,20 +175,34 @@ public class ServiceLayer {
         int result = totalPrice.stream().reduce(BigDecimal.ZERO, BigDecimal::add).intValue();
         points = (result/50)*10;
 
-        LevelUpViewModel currentPoints = findLevelUpByCustomerId(invoiceViewModel.getCustomer().getCustomerId());
-        currentPoints.setPoints(currentPoints.getPoints()+points);
-        currentPoints = updateLevelUp((convertLevelUpToInputModel(currentPoints)));
+        LevelUpInputModel currentPoints = levelUpClient.getLevelUpByCustomerId(invoiceViewModel.getCustomer().getCustomerId());
 
-        invoiceViewModel.setMemberPoints(currentPoints.getPoints());
+        currentPoints.setPoints(currentPoints.getPoints()+points);
+
+        if(currentPoints.getLevelUpId()==0){
+            currentPoints.setCustomerId(invoiceViewModel.getCustomer().getCustomerId());
+            // Adding points to InvoiceViewModel
+            invoiceViewModel.setMemberPoints("Level Up! Service currently unavailable! No worries... Your new points were saved :)");
+        } else {
+            // Adding points to InvoiceViewModel
+            invoiceViewModel.setMemberPoints(String.valueOf(currentPoints.getPoints()));
+        }
+
+        // Sending to Queue
+        System.out.println("Updating Level Up! account for customerId: "+currentPoints.getCustomerId());
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, (convertLevelUpToInputModel(currentPoints)));
+        System.out.println("Msg Sent to Queue to update...");
 
         return invoiceViewModel;
     }
 
+    @Transactional
     public InvoiceViewModel findInvoice(int invoiceId){
         System.out.println("Contacting Invoice Service client to get invoice...");
         return buildInvoiceViewModel(invoiceClient.getInvoice(invoiceId));
     }
 
+    @Transactional
     public List<InvoiceViewModel> findAllInvoices(){
         // Getting invoices list
         System.out.println("Contacting Invoice Service client to get all invoices...");
@@ -210,6 +215,7 @@ public class ServiceLayer {
         return invoiceViewModels;
     }
 
+    @Transactional
     public List<InvoiceViewModel> findInvoicesByCustomer(int customerId){
         // Getting invoices list
         System.out.println("Contacting Invoice Service client to get all invoices for customer...");
@@ -223,18 +229,25 @@ public class ServiceLayer {
     }
 
     //
-    // HELPER METHODS
-    private void checkForCustomer(int customerId){
-        System.out.println("Checking if customer exists...");
-        try{
-            findCustomer(customerId);
-        } catch (FeignException e){
-            System.out.println("...customer wasn't found in DB!");
-            throw new NotFoundException("Customer doesn't exist! Create the customer first using: [POST] 'uri=/customers' endpoint.");
-        }
-        System.out.println("...customer found in DB!");
+    //
+    // Customer Service Methods
+    // --------------------- //
+    private CustomerViewModel findCustomer(int customerId){
+        System.out.println("Contacting Customer Service client to get customer...");
+        return customerClient.getCustomer(customerId);
     }
 
+    //
+    // Product Service Methods
+    // --------------------- //
+    private ProductViewModel findProduct(int productId){
+        System.out.println("Contacting Product Service client to get product...");
+        return productClient.getProduct(productId);
+    }
+
+    //
+    // Helper Methods
+    // --------------------- //
     private InventoryViewModel buildInventoryViewModel(InventoryInputModel inventoryInputModel){
         // Persisting Inventory
         InventoryViewModel inventoryViewModel = new InventoryViewModel();
@@ -281,22 +294,25 @@ public class ServiceLayer {
             invoiceItemsList.add(product);
         });
 
+        //Getting Membership info
+        LevelUpViewModel levelUp = findLevelUpByCustomerId(invoice.getCustomerId());
+
         //persisting
         invoiceViewModel.setInvoiceId(invoice.getInvoiceId());
         invoiceViewModel.setPurchaseDate(invoice.getPurchaseDate());
-        invoiceViewModel.setCustomer(findCustomer(invoice.getCustomerId()));
-        invoiceViewModel.setMemberPoints(findLevelUpByCustomerId(invoice.getCustomerId()).getPoints());
+        invoiceViewModel.setCustomer(levelUp.getCustomer());
+        invoiceViewModel.setMemberPoints(String.valueOf(levelUp.getPoints()));
         invoiceViewModel.setInvoiceItems(invoiceItemsList);
 
         return invoiceViewModel;
     }
 
-    private LevelUpInputModel convertLevelUpToInputModel(LevelUpViewModel levelUpViewModel){
-        LevelUpInputModel levelUpInputModel = new LevelUpInputModel();
-        levelUpInputModel.setLevelUpId(levelUpViewModel.getLevelUpId());
-        levelUpInputModel.setCustomerId(levelUpViewModel.getCustomer().getCustomerId());
-        levelUpInputModel.setMemberDate(levelUpViewModel.getMemberDate());
-        levelUpInputModel.setPoints(levelUpViewModel.getPoints());
-        return levelUpInputModel;
+    private LevelUpMsg convertLevelUpToInputModel(LevelUpInputModel levelUpInputModel){
+        LevelUpMsg msg = new LevelUpMsg();
+        msg.setLevelUpId(levelUpInputModel.getLevelUpId());
+        msg.setCustomerId(levelUpInputModel.getCustomerId());
+        msg.setMemberDate(levelUpInputModel.getMemberDate());
+        msg.setPoints(levelUpInputModel.getPoints());
+        return msg;
     }
 }
